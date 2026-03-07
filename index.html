@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -324,197 +325,239 @@ const IMG=(p,s='w92')=>p?`https://image.tmdb.org/t/p/${s}${p}`:null;
 const fmt=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
 const esc=s=>(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 
-async function tmdb(ep,p={}){const u=new URL(`https://api.themoviedb.org/3${ep}`);u.searchParams.set('api_key',G.apiKey);for(const[k,v]of Object.entries(p))u.searchParams.set(k,v);const r=await fetch(u);if(!r.ok)throw new Error(`TMDB ${r.status}`);return r.json();}
-async function findActors(q){if(!q||q.length<2)return[];const d=await tmdb('/search/person',{query:q,include_adult:false});return(d.results||[]).slice(0,7);}
+async function tmdb(ep,p={}){const u=new URL(`https://api.themoviedb.org/3${ep}`);u.searchParams.set(‘api_key’,G.apiKey);for(const[k,v]of Object.entries(p))u.searchParams.set(k,v);const r=await fetch(u);if(!r.ok)throw new Error(`TMDB ${r.status}`);return r.json();}
+async function findActors(q){if(!q||q.length<2)return[];const d=await tmdb(’/search/person’,{query:q,include_adult:false});return(d.results||[]).slice(0,7);}
 async function getCredits(id){const d=await tmdb(`/person/${id}/combined_credits`);return(d.cast||[]).filter(c=>c.media_type===G.media&&c.vote_count>5);}
-async function sharedTitles(id1,id2){const[c1,c2]=await Promise.all([getCredits(id1),getCredits(id2)]);const m=new Map(c1.map(x=>[x.id,x]));return c2.filter(x=>m.has(x.id)&&!G.usedTitles.has(x.id)).map(x=>({...x,title:x.title||x.name})).sort((a,b)=>(b.vote_count||0)-(a.vote_count||0));}
-async function searchTitles(q){if(!q||q.length<2)return[];const ep=G.media==='movie'?'/search/movie':'/search/tv';const d=await tmdb(ep,{query:q,include_adult:false});return(d.results||[]).filter(t=>t.vote_count>5&&!G.usedTitles.has(t.id)).slice(0,7).map(t=>({...t,title:t.title||t.name}));}
+async function sharedTitles(id1,id2){const[c1,c2]=await Promise.all([getCredits(id1),getCredits(id2)]);const m=new Map(c1.map(x=>[x.id,x]));return c2.filter(x=>m.has(x.id)&&!G.usedTitles.has(x.id)).map(x=>({…x,title:x.title||x.name})).sort((a,b)=>(b.vote_count||0)-(a.vote_count||0));}
+async function searchTitles(q){if(!q||q.length<2)return[];const ep=G.media===‘movie’?’/search/movie’:’/search/tv’;const d=await tmdb(ep,{query:q,include_adult:false});return(d.results||[]).filter(t=>t.vote_count>5&&!G.usedTitles.has(t.id)).slice(0,7).map(t=>({…t,title:t.title||t.name}));}
 
-function setMedia(m){G.media=m;document.getElementById('btnMovie').className='ttbtn'+(m==='movie'?' am':'');document.getElementById('btnTV').className='ttbtn'+(m==='tv'?' at':'');}
-function setDiff(d){G.diff=d;['easy','med','hard'].forEach(x=>{const el=document.getElementById('dc'+x[0].toUpperCase()+x.slice(1));el.className='diff-card'+(x===d?` sel-${x}`:'');el.querySelector('.diff-check').textContent=x===d?'✓':'';}); }
-function updSlider(v){G.chainLen=parseInt(v);const mid=G.chainLen-2;document.getElementById('slVal').innerHTML=`${v} <span style="font-size:12px;color:var(--muted);letter-spacing:1px">STEPS</span>`;document.getElementById('slSub').textContent=`${mid} actor${mid===1?'':'s'} to find`;}
-function togTimer(){G.timerOn=!G.timerOn;document.getElementById('timerTgl').classList.toggle('on',G.timerOn);document.getElementById('timerSub').textContent=G.timerOn?'90 sec per step — ON':'90 sec per step';}
+function setMedia(m){G.media=m;document.getElementById(‘btnMovie’).className=‘ttbtn’+(m===‘movie’?’ am’:’’);document.getElementById(‘btnTV’).className=‘ttbtn’+(m===‘tv’?’ at’:’’);}
+function setDiff(d){G.diff=d;[‘easy’,‘med’,‘hard’].forEach(x=>{const el=document.getElementById(‘dc’+x[0].toUpperCase()+x.slice(1));el.className=‘diff-card’+(x===d?` sel-${x}`:’’);el.querySelector(’.diff-check’).textContent=x===d?‘✓’:’’;}); }
+function updSlider(v){G.chainLen=parseInt(v);const mid=G.chainLen-2;document.getElementById(‘slVal’).innerHTML=`${v} <span style="font-size:12px;color:var(--muted);letter-spacing:1px">STEPS</span>`;document.getElementById(‘slSub’).textContent=`${mid} actor${mid===1?'':'s'} to find`;}
+function togTimer(){G.timerOn=!G.timerOn;document.getElementById(‘timerTgl’).classList.toggle(‘on’,G.timerOn);document.getElementById(‘timerSub’).textContent=G.timerOn?‘90 sec per step — ON’:‘90 sec per step’;}
 
-function goScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
-function goSetup(){if(!G.apiKey){goScreen('apisetup');return;}resetSetup();document.getElementById('setupTitle').textContent=G.media==='tv'?'CHOOSE TV STARS':'CHOOSE MOVIE STARS';goScreen('setup');}
-function saveKey(){const k=document.getElementById('apiKeyInp').value.trim();if(!k)return;G.apiKey=k;localStorage.setItem('tmdb_key',k);resetSetup();goScreen('setup');}
-function resetSetup(){G.startActor=G.endActor=null;['start','end'].forEach(r=>{document.getElementById(r+'Wrap').innerHTML=`<input class="srch-inp" id="${r}Inp" placeholder="Search actor or actress…" oninput="srchSetup('${r}',this.value)" autocomplete="off"><div class="sug-list" id="${r}Sug"></div>`;});document.getElementById('playBtn').classList.add('dim');document.getElementById('setupErr').textContent='';}
-function openHow(){document.getElementById('howModal').classList.add('open');}
-document.getElementById('howModal').addEventListener('click',e=>{if(e.target.id==='howModal')document.getElementById('howModal').classList.remove('open');});
+function goScreen(id){document.querySelectorAll(’.screen’).forEach(s=>s.classList.remove(‘active’));document.getElementById(id).classList.add(‘active’);window.scrollTo(0,0);}
+function goSetup(){if(!G.apiKey){goScreen(‘apisetup’);return;}resetSetup();document.getElementById(‘setupTitle’).textContent=G.media===‘tv’?‘CHOOSE TV STARS’:‘CHOOSE MOVIE STARS’;goScreen(‘setup’);}
+function saveKey(){const k=document.getElementById(‘apiKeyInp’).value.trim();if(!k)return;G.apiKey=k;localStorage.setItem(‘tmdb_key’,k);resetSetup();goScreen(‘setup’);}
+function resetSetup(){G.startActor=G.endActor=null;[‘start’,‘end’].forEach(r=>{document.getElementById(r+‘Wrap’).innerHTML=`<input class="srch-inp" id="${r}Inp" placeholder="Search actor or actress…" oninput="srchSetup('${r}',this.value)" autocomplete="off"><div class="sug-list" id="${r}Sug"></div>`;});document.getElementById(‘playBtn’).classList.add(‘dim’);document.getElementById(‘setupErr’).textContent=’’;}
+function openHow(){document.getElementById(‘howModal’).classList.add(‘open’);}
+document.getElementById(‘howModal’).addEventListener(‘click’,e=>{if(e.target.id===‘howModal’)document.getElementById(‘howModal’).classList.remove(‘open’);});
 
-async function srchSetup(role,q){clearTimeout(G.srchTmr[role]);const el=document.getElementById(role+'Sug');if(!q||q.length<2){el.innerHTML='';return;}el.innerHTML=`<div class="sug-item"><div class="loading-dots"><span></span><span></span><span></span></div></div>`;G.srchTmr[role]=setTimeout(async()=>{try{const res=await findActors(q);el.innerHTML=res.length?res.map(a=>`<div class="sug-item" onclick='selSetup("${role}",${JSON.stringify(a).replace(/'/g,"&#39;")})'>${a.profile_path?`<img class="sug-ph" src="${IMG(a.profile_path)}"/>`:`<div class="sug-ph" style="display:flex;align-items:center;justify-content:center;font-size:17px">👤</div>`}<div><div class="sug-nm">${esc(a.name)}</div><div class="sug-kn">${a.known_for_department||'Acting'}</div></div></div>`).join(''):`<div class="sug-item" style="color:var(--muted)">No results</div>`;}catch(e){el.innerHTML=`<div class="sug-item" style="color:var(--red)">Error</div>`;}},380);}
-function selSetup(role,a){if(typeof a==='string')a=JSON.parse(a);G[role==='start'?'startActor':'endActor']=a;const w=document.getElementById(role+'Wrap');const ph=a.profile_path?IMG(a.profile_path,'w92'):null;w.innerHTML=`<div class="sel-actor">${ph?`<img class="sel-ph" src="${ph}"/>`:`<div class="sel-ph" style="display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--surf2)">👤</div>`}<div><div class="sel-nm">${esc(a.name)}</div><div class="sel-kn">${a.known_for_department||'Acting'}</div></div><button class="chg-btn" onclick="clearSetup('${role}')">Change</button></div>`;chkReady();}
-function clearSetup(role){G[role==='start'?'startActor':'endActor']=null;document.getElementById(role+'Wrap').innerHTML=`<input class="srch-inp" id="${role}Inp" placeholder="Search actor or actress…" oninput="srchSetup('${role}',this.value)" autocomplete="off"><div class="sug-list" id="${role}Sug"></div>`;chkReady();}
-function chkReady(){const ok=G.startActor&&G.endActor&&G.startActor.id!==G.endActor.id;document.getElementById('playBtn').classList.toggle('dim',!ok);document.getElementById('setupErr').textContent=(G.startActor&&G.endActor&&G.startActor.id===G.endActor.id)?'Pick two different actors!':'';}
+async function srchSetup(role,q){clearTimeout(G.srchTmr[role]);const el=document.getElementById(role+‘Sug’);if(!q||q.length<2){el.innerHTML=’’;return;}el.innerHTML=`<div class="sug-item"><div class="loading-dots"><span></span><span></span><span></span></div></div>`;G.srchTmr[role]=setTimeout(async()=>{try{const res=await findActors(q);el.innerHTML=res.length?res.map(a=>`<div class="sug-item" onclick='selSetup("${role}",${JSON.stringify(a).replace(/'/g,"&#39;")})'>${a.profile_path?`<img class="sug-ph" src="${IMG(a.profile_path)}"/>`:`<div class="sug-ph" style="display:flex;align-items:center;justify-content:center;font-size:17px">👤</div>`}<div><div class="sug-nm">${esc(a.name)}</div><div class="sug-kn">${a.known_for_department||'Acting'}</div></div></div>`).join(’’):`<div class="sug-item" style="color:var(--muted)">No results</div>`;}catch(e){el.innerHTML=`<div class="sug-item" style="color:var(--red)">Error</div>`;}},380);}
+function selSetup(role,a){if(typeof a===‘string’)a=JSON.parse(a);G[role===‘start’?‘startActor’:‘endActor’]=a;const w=document.getElementById(role+‘Wrap’);const ph=a.profile_path?IMG(a.profile_path,‘w92’):null;w.innerHTML=`<div class="sel-actor">${ph?`<img class="sel-ph" src="${ph}"/>`:`<div class="sel-ph" style="display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--surf2)">👤</div>`}<div><div class="sel-nm">${esc(a.name)}</div><div class="sel-kn">${a.known_for_department||'Acting'}</div></div><button class="chg-btn" onclick="clearSetup('${role}')">Change</button></div>`;chkReady();}
+function clearSetup(role){G[role===‘start’?‘startActor’:‘endActor’]=null;document.getElementById(role+‘Wrap’).innerHTML=`<input class="srch-inp" id="${role}Inp" placeholder="Search actor or actress…" oninput="srchSetup('${role}',this.value)" autocomplete="off"><div class="sug-list" id="${role}Sug"></div>`;chkReady();}
+function chkReady(){const ok=G.startActor&&G.endActor&&G.startActor.id!==G.endActor.id;document.getElementById(‘playBtn’).classList.toggle(‘dim’,!ok);document.getElementById(‘setupErr’).textContent=(G.startActor&&G.endActor&&G.startActor.id===G.endActor.id)?‘Pick two different actors!’:’’;}
 
-function startGame(){killTimer();G.chain=new Array(G.chainLen).fill(null).map(()=>({actor:null,title:null}));G.usedActors=new Set([G.startActor.id,G.endActor.id]);G.usedTitles=new Set();G.step=1;G.phase='actor';G.pendingActor=null;G.pendingTitles=[];G.gameTs=Date.now();G.wrongCount=0;G.chain[0].actor=G.startActor;G.chain[G.chainLen-1].actor=G.endActor;const mp=document.getElementById('mPill');mp.textContent=G.media==='movie'?'🎬 MOVIE':'📺 TV';mp.className=`mpill ${G.media}`;const dp=document.getElementById('dPill');dp.textContent={easy:'🟢 EASY',med:'🟡 MEDIUM',hard:'🔴 HARD'}[G.diff];dp.className=`dpill ${G.diff}`;goScreen('game');renderChain();startStepTimer();}
+function startGame(){killTimer();G.chain=new Array(G.chainLen).fill(null).map(()=>({actor:null,title:null}));G.usedActors=new Set([G.startActor.id,G.endActor.id]);G.usedTitles=new Set();G.step=1;G.phase=‘actor’;G.pendingActor=null;G.pendingTitles=[];G.gameTs=Date.now();G.wrongCount=0;G.chain[0].actor=G.startActor;G.chain[G.chainLen-1].actor=G.endActor;const mp=document.getElementById(‘mPill’);mp.textContent=G.media===‘movie’?‘🎬 MOVIE’:‘📺 TV’;mp.className=`mpill ${G.media}`;const dp=document.getElementById(‘dPill’);dp.textContent={easy:‘🟢 EASY’,med:‘🟡 MEDIUM’,hard:‘🔴 HARD’}[G.diff];dp.className=`dpill ${G.diff}`;goScreen(‘game’);renderChain();startStepTimer();}
 function retryGame(){startGame();}
 
-function startStepTimer(){killTimer();if(!G.timerOn)return;G.timerSec=90;document.getElementById('timerDisp').style.display='block';drawTimer();G.timerIv=setInterval(()=>{G.timerSec--;drawTimer();if(G.timerSec<=0){killTimer();handleTimeout();}},1000);}
+function startStepTimer(){killTimer();if(!G.timerOn)return;G.timerSec=90;document.getElementById(‘timerDisp’).style.display=‘block’;drawTimer();G.timerIv=setInterval(()=>{G.timerSec–;drawTimer();if(G.timerSec<=0){killTimer();handleTimeout();}},1000);}
 function killTimer(){clearInterval(G.timerIv);G.timerIv=null;}
-function drawTimer(){const el=document.getElementById('timerDisp'),s=G.timerSec;el.textContent=fmt(s);el.className='timer-disp'+(s<=10?' dngr':s<=30?' warn':'');}
-function handleTimeout(){document.getElementById('toSub').textContent=`You ran out of time on step ${G.step}.`;goScreen('timeout');}
+function drawTimer(){const el=document.getElementById(‘timerDisp’),s=G.timerSec;el.textContent=fmt(s);el.className=‘timer-disp’+(s<=10?’ dngr’:s<=30?’ warn’:’’);}
+function handleTimeout(){document.getElementById(‘toSub’).textContent=`You ran out of time on step ${G.step}.`;goScreen(‘timeout’);}
 
 function renderChain(){
-  const N=G.chainLen,isTV=G.media==='tv',icon=isTV?'📺':'🎬';
-  const scroll=document.getElementById('chainScroll');
-  let h='';
-  for(let i=0;i<N;i++){
-    const slot=G.chain[i],actor=slot?.actor;
-    const isStart=i===0,isEnd=i===N-1;
-    const isActorInput=(i===G.step&&G.phase==='actor');
-    const isPendingActor=(i===G.step&&G.phase==='title');
-    const isConfirmed=isStart||isEnd||(actor&&slot?.title&&i<G.step);
-    let sc='actor-slot';
-    if(isStart)sc+=' is-start';
-    else if(isEnd)sc+=' is-end';
-    else if(isActorInput)sc+=' is-active';
-    else if(isConfirmed||isPendingActor)sc+=' is-done';
-    const bc=isStart?'start':isEnd?'end':'mid';
-    const bt=isStart?'START':isEnd?'END':'STEP '+i;
-    if(actor){
-      const ph=actor.profile_path?IMG(actor.profile_path,'w185'):null;
-      const tick=isStart?'🟢':isEnd?'🎯':isConfirmed?'✅':'⏳';
-      h+='<div class="'+sc+'" id="slot'+i+'">'
-        +'<span class="af-badge '+bc+'">'+bt+'</span>'
-        +'<div class="actor-filled">'
-        +(ph?'<img class="af-av" src="'+ph+'"/>'
-            :'<div class="af-av" style="display:flex;align-items:center;justify-content:center;font-size:20px">👤</div>')
-        +'<div class="af-info"><div class="af-nm">'+esc(actor.name)+'</div>'
-        +'<div class="af-sub">'+(actor.known_for_department||'Actor')+'</div></div>'
-        +'<div class="af-tick">'+tick+'</div>'
-        +'</div></div>';
-    } else if(isActorInput){
-      const prevActor=G.chain[i-1]?.actor;
-      const med=isTV?'TV show':'movie';
-      const hint=(i===N-2)
-        ?'Actor connecting <strong>'+esc(prevActor?.name||'')+'</strong> → <strong>'+esc(G.endActor?.name||'')+'</strong>'
-        :'Actor who shares a '+med+' with <strong>'+esc(prevActor?.name||'')+'</strong>';
-      h+='<div class="'+sc+'" id="slot'+i+'">'
-        +'<span class="af-badge '+bc+'">'+bt+'</span>'
-        +'<div class="actor-search">'
-        +'<div class="slot-label">👤 '+hint+'</div>'
-        +'<div class="inline-srch-wrap">'
-        +'<input class="inline-inp" id="actorInp'+i+'" placeholder="Search actor…" oninput="srchActor('+i+',this.value)" autocomplete="off">'
-        +'<div class="inline-sug" id="actorSug'+i+'"></div>'
-        +'</div>'
-        +'<div class="inline-fb" id="actorFb'+i+'"></div>'
-        +'</div></div>';
-    } else {
-      h+='<div class="'+sc+'" id="slot'+i+'" style="opacity:.32">'
-        +'<span class="af-badge '+bc+'">'+bt+'</span>'
-        +'<div class="actor-filled">'
-        +'<div class="af-av" style="display:flex;align-items:center;justify-content:center;font-size:20px">🔒</div>'
-        +'<div class="af-info"><div class="af-nm">Locked</div><div class="af-sub">Complete previous steps</div></div>'
-        +'</div></div>';
-    }
-    if(i<N-1){
-      const confirmedTitle=slot?.title;
-      const showTitleSearch=(G.phase==='title'&&i===G.step-1&&!confirmedTitle);
-      if(confirmedTitle){
-        const pc=isTV?'filled-tv':'filled-movie';
-        h+='<div class="connector"><div class="conn-line"></div>'
-          +'<div class="conn-pill '+pc+'">'+icon+' '+esc(confirmedTitle.title||confirmedTitle.name||'')+'</div>'
-          +'<div class="conn-line"></div></div>';
-      } else if(showTitleSearch){
-        const topActor=G.chain[i]?.actor;
-        const botActor=G.pendingActor;
-        const med=isTV?'TV show':'movie';
-        h+='<div class="connector"><div class="conn-line"></div></div>'
-          +'<div class="title-block" id="titleBlock'+i+'">'
-          +'<div class="title-hint">'+icon+' What '+med+' connects <strong>'+esc(topActor?.name||'')+'</strong> and <strong>'+esc(botActor?.name||'')+'</strong>?</div>'
-          +'<div class="title-srch-wrap">'
-          +'<input class="title-inp" id="titleInp'+i+'" placeholder="Search '+med+'…" oninput="srchTitleInline('+i+',this.value)" autocomplete="off">'
-          +'<div class="title-sug" id="titleSug'+i+'"></div>'
-          +'</div>'
-          +'<div class="inline-fb" id="titleFb'+i+'"></div>'
-          +'</div>'
-          +'<div class="connector"><div class="conn-line"></div></div>';
-      } else {
-        h+='<div class="connector"><div class="conn-line"></div><div class="conn-pill">—</div><div class="conn-line"></div></div>';
-      }
-    }
-  }
-  scroll.innerHTML=h;
-  document.getElementById('stepsBadge').textContent=Math.max(0,G.step-1)+'/'+(G.chainLen-2);
-  setTimeout(function(){
-    var focusId=G.phase==='title'?'titleBlock'+(G.step-1):'slot'+G.step;
-    var el=document.getElementById(focusId);
-    if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
-  },120);
+const N=G.chainLen,isTV=G.media===‘tv’,icon=isTV?‘📺’:‘🎬’;
+const scroll=document.getElementById(‘chainScroll’);
+let h=’’;
+for(let i=0;i<N;i++){
+const slot=G.chain[i],actor=slot?.actor;
+const isStart=i===0,isEnd=i===N-1;
+const isActorInput=(i===G.step&&G.phase===‘actor’);
+const isPendingActor=(i===G.step&&G.phase===‘title’);
+const isConfirmed=isStart||isEnd||(actor&&slot?.title&&i<G.step);
+let sc=‘actor-slot’;
+if(isStart)sc+=’ is-start’;
+else if(isEnd)sc+=’ is-end’;
+else if(isActorInput)sc+=’ is-active’;
+else if(isConfirmed||isPendingActor)sc+=’ is-done’;
+const bc=isStart?‘start’:isEnd?‘end’:‘mid’;
+const bt=isStart?‘START’:isEnd?‘END’:‘STEP ‘+i;
+if(actor){
+const ph=actor.profile_path?IMG(actor.profile_path,‘w185’):null;
+const tick=isStart?‘🟢’:isEnd?‘🎯’:isConfirmed?‘✅’:‘⏳’;
+h+=’<div class="'+sc+'" id="slot'+i+'">’
++’<span class="af-badge '+bc+'">’+bt+’</span>’
++’<div class="actor-filled">’
++(ph?’<img class="af-av" src="'+ph+'"/>’
+:’<div class="af-av" style="display:flex;align-items:center;justify-content:center;font-size:20px">👤</div>’)
++’<div class="af-info"><div class="af-nm">’+esc(actor.name)+’</div>’
++’<div class="af-sub">’+(actor.known_for_department||‘Actor’)+’</div></div>’
++’<div class="af-tick">’+tick+’</div>’
++’</div></div>’;
+} else if(isActorInput){
+const prevActor=G.chain[i-1]?.actor;
+const med=isTV?‘TV show’:‘movie’;
+const hint=(i===N-2)
+?‘Actor connecting <strong>’+esc(prevActor?.name||’’)+’</strong> → <strong>’+esc(G.endActor?.name||’’)+’</strong>’
+:‘Actor who shares a ‘+med+’ with <strong>’+esc(prevActor?.name||’’)+’</strong>’;
+h+=’<div class="'+sc+'" id="slot'+i+'">’
++’<span class="af-badge '+bc+'">’+bt+’</span>’
++’<div class="actor-search">’
++’<div class="slot-label">👤 ‘+hint+’</div>’
++’<div class="inline-srch-wrap">’
++’<input class="inline-inp" id="actorInp'+i+'" placeholder="Search actor…" oninput="srchActor('+i+',this.value)" autocomplete="off">’
++’<div class="inline-sug" id="actorSug'+i+'"></div>’
++’</div>’
++’<div class="inline-fb" id="actorFb'+i+'"></div>’
++’</div></div>’;
+} else {
+h+=’<div class="'+sc+'" id="slot'+i+'" style="opacity:.32">’
++’<span class="af-badge '+bc+'">’+bt+’</span>’
++’<div class="actor-filled">’
++’<div class="af-av" style="display:flex;align-items:center;justify-content:center;font-size:20px">🔒</div>’
++’<div class="af-info"><div class="af-nm">Locked</div><div class="af-sub">Complete previous steps</div></div>’
++’</div></div>’;
+}
+if(i<N-1){
+const confirmedTitle=slot?.title;
+const showTitleSearch=(G.phase===‘title’&&i===G.step-1&&!confirmedTitle);
+if(confirmedTitle){
+const pc=isTV?‘filled-tv’:‘filled-movie’;
+h+=’<div class="connector"><div class="conn-line"></div>’
++’<div class="conn-pill '+pc+'">’+icon+’ ‘+esc(confirmedTitle.title||confirmedTitle.name||’’)+’</div>’
++’<div class="conn-line"></div></div>’;
+} else if(showTitleSearch){
+const topActor=G.chain[i]?.actor;
+// For the last connector (i===N-2), bottom actor is the End Star
+const botActor=(i===N-2)?G.endActor:G.pendingActor;
+const med=isTV?‘TV show’:‘movie’;
+h+=’<div class="connector"><div class="conn-line"></div></div>’
++’<div class="title-block" id="titleBlock'+i+'">’
++’<div class="title-hint">’+icon+’ What ‘+med+’ connects <strong>’+esc(topActor?.name||’’)+’</strong> and <strong>’+esc(botActor?.name||’’)+’</strong>?</div>’
++’<div class="title-srch-wrap">’
++’<input class="title-inp" id="titleInp'+i+'" placeholder="Search '+med+'…" oninput="srchTitleInline('+i+',this.value)" autocomplete="off">’
++’<div class="title-sug" id="titleSug'+i+'"></div>’
++’</div>’
++’<div class="inline-fb" id="titleFb'+i+'"></div>’
++’</div>’
++’<div class="connector"><div class="conn-line"></div></div>’;
+} else {
+h+=’<div class="connector"><div class="conn-line"></div><div class="conn-pill">—</div><div class="conn-line"></div></div>’;
+}
+}
+}
+scroll.innerHTML=h;
+document.getElementById(‘stepsBadge’).textContent=Math.max(0,G.step-1)+’/’+(G.chainLen-2);
+setTimeout(function(){
+var focusId=G.phase===‘title’?‘titleBlock’+(G.step-1):‘slot’+G.step;
+var el=document.getElementById(focusId);
+if(el)el.scrollIntoView({behavior:‘smooth’,block:‘center’});
+},120);
 }
 
 async function srchActor(idx,q){
-  clearTimeout(G.srchTmr[`a${idx}`]);
-  const el=document.getElementById(`actorSug${idx}`);
-  if(!q||q.length<2){el.innerHTML='';return;}
-  el.innerHTML=`<div class="sug-item"><div class="loading-dots"><span></span><span></span><span></span></div></div>`;
-  G.srchTmr[`a${idx}`]=setTimeout(async()=>{
-    try{const res=await findActors(q);const fil=res.filter(a=>!G.usedActors.has(a.id));el.innerHTML=fil.length?fil.map(a=>`<div class="sug-item" onclick='pickActor(${idx},${JSON.stringify(a).replace(/'/g,"&#39;")})'>${a.profile_path?`<img class="sug-ph" src="${IMG(a.profile_path)}"/>`:`<div class="sug-ph" style="display:flex;align-items:center;justify-content:center;font-size:17px">👤</div>`}<div><div class="sug-nm">${esc(a.name)}</div><div class="sug-kn">${a.known_for_department||'Acting'}</div></div></div>`).join(''):`<div class="sug-item" style="color:var(--muted)">No results</div>`;}
-    catch(e){el.innerHTML=`<div class="sug-item" style="color:var(--red)">Search error</div>`;}
-  },380);
+clearTimeout(G.srchTmr[`a${idx}`]);
+const el=document.getElementById(`actorSug${idx}`);
+if(!q||q.length<2){el.innerHTML=’’;return;}
+el.innerHTML=`<div class="sug-item"><div class="loading-dots"><span></span><span></span><span></span></div></div>`;
+G.srchTmr[`a${idx}`]=setTimeout(async()=>{
+try{const res=await findActors(q);const fil=res.filter(a=>!G.usedActors.has(a.id));el.innerHTML=fil.length?fil.map(a=>`<div class="sug-item" onclick='pickActor(${idx},${JSON.stringify(a).replace(/'/g,"&#39;")})'>${a.profile_path?`<img class="sug-ph" src="${IMG(a.profile_path)}"/>`:`<div class="sug-ph" style="display:flex;align-items:center;justify-content:center;font-size:17px">👤</div>`}<div><div class="sug-nm">${esc(a.name)}</div><div class="sug-kn">${a.known_for_department||'Acting'}</div></div></div>`).join(’’):`<div class="sug-item" style="color:var(--muted)">No results</div>`;}
+catch(e){el.innerHTML=`<div class="sug-item" style="color:var(--red)">Search error</div>`;}
+},380);
 }
 
 async function pickActor(idx,a){
-  if(typeof a==='string')a=JSON.parse(a);
-  const sug=document.getElementById(`actorSug${idx}`);const inp=document.getElementById(`actorInp${idx}`);const fb=document.getElementById(`actorFb${idx}`);
-  if(sug)sug.innerHTML='';if(inp)inp.value=a.name;
-  const prev=G.chain[G.step-1]?.actor;const N=G.chainLen,med=G.media==='tv'?'TV show':'movie';
-  setFb(fb,'info','Checking…');
-  try{
-    const sp=await sharedTitles(prev.id,a.id);
-    if(!sp.length){G.wrongCount++;if(G.diff==='hard')setFb(fb,'bad','✗ Incorrect.');else setFb(fb,'bad',`✗ <strong>${esc(a.name)}</strong> doesn't share a ${med} with <strong>${esc(prev.name)}</strong>.`);if(inp){inp.value='';inp.focus();}flashSlot(`slot${idx-1}`);return;}
-    if(G.step===N-2){const se=await sharedTitles(a.id,G.endActor.id);if(!se.length){G.wrongCount++;if(G.diff==='hard')setFb(fb,'bad','✗ Incorrect.');else setFb(fb,'bad',`✗ <strong>${esc(a.name)}</strong> can't connect to <strong>${esc(G.endActor.name)}</strong> via a ${med}.`);if(inp){inp.value='';inp.focus();}return;}G.pendingActor=a;G.pendingTitles=sp;a._endTitles=se;}
-    else{G.pendingActor=a;G.pendingTitles=sp;}
-    G.chain[G.step].actor=a;G.phase='title';renderChain();
-    setTimeout(()=>{const ti=document.getElementById(`titleInp${G.step-1}`);if(ti)ti.focus();},150);
-  }catch(e){setFb(fb,'bad','Something went wrong.');}
+if(typeof a===‘string’)a=JSON.parse(a);
+const sug=document.getElementById(`actorSug${idx}`);const inp=document.getElementById(`actorInp${idx}`);const fb=document.getElementById(`actorFb${idx}`);
+if(sug)sug.innerHTML=’’;if(inp)inp.value=a.name;
+const prev=G.chain[G.step-1]?.actor;const N=G.chainLen,med=G.media===‘tv’?‘TV show’:‘movie’;
+setFb(fb,‘info’,‘Checking…’);
+try{
+const sp=await sharedTitles(prev.id,a.id);
+if(!sp.length){G.wrongCount++;if(G.diff===‘hard’)setFb(fb,‘bad’,‘✗ Incorrect.’);else setFb(fb,‘bad’,`✗ <strong>${esc(a.name)}</strong> doesn't share a ${med} with <strong>${esc(prev.name)}</strong>.`);if(inp){inp.value=’’;inp.focus();}flashSlot(`slot${idx-1}`);return;}
+if(G.step===N-2){const se=await sharedTitles(a.id,G.endActor.id);if(!se.length){G.wrongCount++;if(G.diff===‘hard’)setFb(fb,‘bad’,‘✗ Incorrect.’);else setFb(fb,‘bad’,`✗ <strong>${esc(a.name)}</strong> can't connect to <strong>${esc(G.endActor.name)}</strong> via a ${med}.`);if(inp){inp.value=’’;inp.focus();}return;}G.pendingActor=a;G.pendingTitles=sp;a._endTitles=se;}
+else{G.pendingActor=a;G.pendingTitles=sp;}
+G.chain[G.step].actor=a;G.phase=‘title’;renderChain();
+setTimeout(()=>{const ti=document.getElementById(`titleInp${G.step-1}`);if(ti)ti.focus();},150);
+}catch(e){setFb(fb,‘bad’,‘Something went wrong.’);}
 }
 
 async function srchTitleInline(connIdx,q){
-  clearTimeout(G.srchTmr[`t${connIdx}`]);
-  const el=document.getElementById(`titleSug${connIdx}`);
-  if(!q||q.length<2){el.innerHTML='';return;}
-  el.innerHTML=`<div class="sug-item"><div class="loading-dots"><span></span><span></span><span></span></div></div>`;
-  G.srchTmr[`t${connIdx}`]=setTimeout(async()=>{
-    try{
-      const res=await searchTitles(q);const valid=res.filter(t=>G.pendingTitles.some(pt=>pt.id===t.id));const icon=G.media==='tv'?'📺':'🎬';
-      if(!valid.length){el.innerHTML=res.length?res.map(t=>`<div class="sug-item" style="opacity:.4"><div class="sug-ph" style="display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--surf2)">${icon}</div><div><div class="sug-nm">${esc(t.title)}</div><div class="sug-kn">${t.release_date?.slice(0,4)||t.first_air_date?.slice(0,4)||''} — not a match</div></div></div>`).join(''):`<div class="sug-item" style="color:var(--muted)">No results</div>`;}
-      else{el.innerHTML=valid.map(t=>{const yr=t.release_date?.slice(0,4)||t.first_air_date?.slice(0,4)||'';return`<div class="sug-item" onclick='pickTitle(${connIdx},${JSON.stringify(t).replace(/'/g,"&#39;")})'><div class="sug-ph" style="display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--surf2)">${icon}</div><div><div class="sug-nm">${esc(t.title)}</div><div class="sug-kn">${yr}</div></div></div>`;}).join('');}
-    }catch(e){el.innerHTML=`<div class="sug-item" style="color:var(--red)">Search error</div>`;}
-  },380);
+clearTimeout(G.srchTmr[`t${connIdx}`]);
+const el=document.getElementById(`titleSug${connIdx}`);
+if(!q||q.length<2){el.innerHTML=’’;return;}
+el.innerHTML=`<div class="sug-item"><div class="loading-dots"><span></span><span></span><span></span></div></div>`;
+G.srchTmr[`t${connIdx}`]=setTimeout(async()=>{
+try{
+const res=await searchTitles(q);const valid=res.filter(t=>G.pendingTitles.some(pt=>pt.id===t.id));const icon=G.media===‘tv’?‘📺’:‘🎬’;
+if(!valid.length){el.innerHTML=res.length?res.map(t=>`<div class="sug-item" style="opacity:.4"><div class="sug-ph" style="display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--surf2)">${icon}</div><div><div class="sug-nm">${esc(t.title)}</div><div class="sug-kn">${t.release_date?.slice(0,4)||t.first_air_date?.slice(0,4)||''} — not a match</div></div></div>`).join(’’):`<div class="sug-item" style="color:var(--muted)">No results</div>`;}
+else{el.innerHTML=valid.map(t=>{const yr=t.release_date?.slice(0,4)||t.first_air_date?.slice(0,4)||’’;return`<div class="sug-item" onclick='pickTitle(${connIdx},${JSON.stringify(t).replace(/'/g,"&#39;")})'><div class="sug-ph" style="display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--surf2)">${icon}</div><div><div class="sug-nm">${esc(t.title)}</div><div class="sug-kn">${yr}</div></div></div>`;}).join(’’);}
+}catch(e){el.innerHTML=`<div class="sug-item" style="color:var(--red)">Search error</div>`;}
+},380);
 }
 
 async function pickTitle(connIdx,t){
-  if(typeof t==='string')t=JSON.parse(t);
-  const fb=document.getElementById(`titleFb${connIdx}`);
-  const match=G.pendingTitles.find(pt=>pt.id===t.id);
-  if(!match){G.wrongCount++;const prev=G.chain[G.step-1]?.actor;const med=G.media==='tv'?'TV show':'movie';if(G.diff==='hard')setFb(fb,'bad','✗ Incorrect title.');else setFb(fb,'bad',`✗ <strong>${esc(t.title)}</strong> doesn't connect <strong>${esc(prev.name)}</strong> and <strong>${esc(G.pendingActor.name)}</strong> — try another ${med}!`);const inp=document.getElementById(`titleInp${connIdx}`);if(inp){inp.value='';inp.focus();}return;}
-  await commitStep(match);
+if(typeof t===‘string’)t=JSON.parse(t);
+const fb=document.getElementById(`titleFb${connIdx}`);
+const match=G.pendingTitles.find(pt=>pt.id===t.id);
+if(!match){
+G.wrongCount++;
+const med=G.media===‘tv’?‘TV show’:‘movie’;
+// For the end connector, describe the two actors correctly
+const topActor=G.chain[connIdx]?.actor;
+const botActor=connIdx===G.chainLen-2?G.endActor:G.pendingActor;
+if(G.diff===‘hard’)setFb(fb,‘bad’,‘✗ Incorrect title.’);
+else setFb(fb,‘bad’,`✗ <strong>${esc(t.title)}</strong> doesn't connect <strong>${esc(topActor?.name||'')}</strong> and <strong>${esc(botActor?.name||'')}</strong> — try another ${med}!`);
+const inp=document.getElementById(`titleInp${connIdx}`);
+if(inp){inp.value=’’;inp.focus();}
+return;
+}
+// If this is the final connector (lastMiddle → End), use commitEndTitle
+if(connIdx===G.chainLen-2) await commitEndTitle(match);
+else await commitStep(match);
 }
 
 async function commitStep(match){
-  const N=G.chainLen,step=G.step,actor=G.pendingActor;
-  if(step===N-2){const endTitles=actor._endTitles||await sharedTitles(actor.id,G.endActor.id);G.chain[step-1].title=match;G.chain[step].actor=actor;G.chain[step].title=endTitles[0];G.usedActors.add(actor.id);G.usedTitles.add(match.id);G.usedTitles.add(endTitles[0].id);G.step=N;G.phase='actor';killTimer();renderChain();setTimeout(showWin,600);}
-  else{G.chain[step-1].title=match;G.chain[step].actor=actor;G.usedActors.add(actor.id);G.usedTitles.add(match.id);G.step++;G.phase='actor';G.pendingActor=null;G.pendingTitles=[];renderChain();startStepTimer();setTimeout(()=>{const el=document.getElementById(`actorInp${G.step}`);if(el)el.focus();},150);}
+const N=G.chainLen,step=G.step,actor=G.pendingActor;
+if(step===N-2){
+// Commit the title connecting prev→lastMiddle, place the actor,
+// then ask the player to also type the title connecting lastMiddle→End
+G.chain[step-1].title=match;
+G.chain[step].actor=actor;
+G.usedActors.add(actor.id);
+G.usedTitles.add(match.id);
+// Now need title between slot step and slot N-1 (the end)
+// Re-use pendingTitles = shared titles between lastMiddle and end
+G.pendingTitles=actor._endTitles||await sharedTitles(actor.id,G.endActor.id);
+G.pendingActor=actor; // still needed for title validation
+G.step=N-1; // connector index for title search is step (=N-2), between slot N-2 and N-1
+G.phase=‘title’;
+renderChain();
+setTimeout(()=>{const ti=document.getElementById(‘titleInp’+(N-2));if(ti)ti.focus();},150);
+} else {
+G.chain[step-1].title=match;G.chain[step].actor=actor;G.usedActors.add(actor.id);G.usedTitles.add(match.id);G.step++;G.phase=‘actor’;G.pendingActor=null;G.pendingTitles=[];renderChain();startStepTimer();setTimeout(()=>{const el=document.getElementById(`actorInp${G.step}`);if(el)el.focus();},150);
+}
+}
+
+async function commitEndTitle(match){
+// Called when the player picks the final title (lastMiddle → End)
+const N=G.chainLen;
+G.chain[N-2].title=match;
+G.usedTitles.add(match.id);
+G.step=N; G.phase=‘actor’;
+G.pendingActor=null; G.pendingTitles=[];
+killTimer(); renderChain();
+setTimeout(showWin,600);
 }
 
 function setFb(el,type,html){if(!el)return;el.className=`inline-fb ${type}`;el.innerHTML=html;}
-function flashSlot(id){const el=document.getElementById(id);if(!el)return;el.classList.add('is-wrong');setTimeout(()=>el.classList.remove('is-wrong'),500);}
+function flashSlot(id){const el=document.getElementById(id);if(!el)return;el.classList.add(‘is-wrong’);setTimeout(()=>el.classList.remove(‘is-wrong’),500);}
 
 function showWin(){
-  const N=G.chainLen,moves=N-2,isTV=G.media==='tv',icon=isTV?'📺':'🎬';
-  const elapsed=Math.round((Date.now()-G.gameTs)/1000);
-  const diffLabel={easy:'🟢 Easy',med:'🟡 Medium',hard:'🔴 Hard'}[G.diff];
-  document.getElementById('winStats').innerHTML=`<div class="w-stat"><div class="w-sv">${moves}</div><div class="w-sl">Move${moves===1?'':'s'}</div></div><div class="w-stat"><div class="w-sv">${icon}</div><div class="w-sl">${isTV?'TV':'Movie'}</div></div><div class="w-stat"><div class="w-sv">${fmt(elapsed)}</div><div class="w-sl">Time</div></div><div class="w-stat"><div class="w-sv">${G.wrongCount}</div><div class="w-sl">Wrong</div></div>`;
-  let ch='';
-  for(let i=0;i<N;i++){const slot=G.chain[i],actor=slot.actor;const dc=i===0?'var(--green)':i===N-1?'var(--red)':'var(--gold)';ch+=`<div class="wc-step"><div class="wc-dot" style="background:${dc}"></div><strong>${esc(actor.name)}</strong></div>`;if(slot.title)ch+=`<div class="wc-ttl">${icon} ${esc(slot.title.title||slot.title.name||'')}</div>`;}
-  document.getElementById('winChain').innerHTML=`<div class="wc-title">Your Chain • ${diffLabel}</div>${ch}`;
-  goScreen('win');
+const N=G.chainLen,moves=N-2,isTV=G.media===‘tv’,icon=isTV?‘📺’:‘🎬’;
+const elapsed=Math.round((Date.now()-G.gameTs)/1000);
+const diffLabel={easy:‘🟢 Easy’,med:‘🟡 Medium’,hard:‘🔴 Hard’}[G.diff];
+document.getElementById(‘winStats’).innerHTML=`<div class="w-stat"><div class="w-sv">${moves}</div><div class="w-sl">Move${moves===1?'':'s'}</div></div><div class="w-stat"><div class="w-sv">${icon}</div><div class="w-sl">${isTV?'TV':'Movie'}</div></div><div class="w-stat"><div class="w-sv">${fmt(elapsed)}</div><div class="w-sl">Time</div></div><div class="w-stat"><div class="w-sv">${G.wrongCount}</div><div class="w-sl">Wrong</div></div>`;
+let ch=’’;
+for(let i=0;i<N;i++){const slot=G.chain[i],actor=slot.actor;const dc=i===0?‘var(–green)’:i===N-1?‘var(–red)’:‘var(–gold)’;ch+=`<div class="wc-step"><div class="wc-dot" style="background:${dc}"></div><strong>${esc(actor.name)}</strong></div>`;if(slot.title)ch+=`<div class="wc-ttl">${icon} ${esc(slot.title.title||slot.title.name||'')}</div>`;}
+document.getElementById(‘winChain’).innerHTML=`<div class="wc-title">Your Chain • ${diffLabel}</div>${ch}`;
+goScreen(‘win’);
 }
 
-function confirmQuit(){killTimer();if(confirm('Quit this game?'))goScreen('home');else startStepTimer();}
+function confirmQuit(){killTimer();if(confirm(‘Quit this game?’))goScreen(‘home’);else startStepTimer();}
 updSlider(5);
 </script>
+
 </body>
 </html>
