@@ -256,7 +256,7 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;bac
         <div class="diff-icon">🟢</div>
         <div class="diff-info">
           <div class="diff-name easy">Easy</div>
-          <div class="diff-desc">Autocomplete actor — type &amp; submit the connecting title</div>
+          <div class="diff-desc">Search actor &amp; title — wrong answers show exactly what failed</div>
         </div>
         <div class="diff-check">✓</div>
       </div>
@@ -264,7 +264,7 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;bac
         <div class="diff-icon">🟡</div>
         <div class="diff-info">
           <div class="diff-name med">Medium</div>
-          <div class="diff-desc">Type both actor &amp; title — told exactly what's wrong</div>
+          <div class="diff-desc">Search actor &amp; title — wrong answers show which part failed</div>
         </div>
         <div class="diff-check"></div>
       </div>
@@ -272,7 +272,7 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;bac
         <div class="diff-icon">🔴</div>
         <div class="diff-info">
           <div class="diff-name hard">Hard</div>
-          <div class="diff-desc">Type both actor &amp; title — only right or wrong, no hints</div>
+          <div class="diff-desc">Search actor &amp; title — only told right or wrong, no hints</div>
         </div>
         <div class="diff-check"></div>
       </div>
@@ -366,38 +366,19 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;bac
 ```
 <div class="inp-hint" id="inpHint"></div>
 
-<!-- EASY actor phase: live search dropdown -->
-<div id="easyActorRow" style="display:none">
+<!-- ACTOR phase: live search dropdown (all difficulties) -->
+<div id="actorRow" style="display:none">
   <div class="srch-game-wrap">
     <input class="srch-inp" id="gSrchInp" placeholder="Search actor…" oninput="srchGame(this.value)" autocomplete="off">
     <div class="sug-list g-sug" id="gSug"></div>
   </div>
 </div>
 
-<!-- EASY title phase: text + submit -->
-<div id="easyTitleRow" style="display:none">
-  <div class="submit-row">
-    <input class="hard-txt title-mode" id="gTitleInp" placeholder="Type the connecting title…" autocomplete="off"
-           oninput="onTitleInp(this.value)" onkeydown="if(event.key==='Enter')submitTitle()">
-    <button class="sub-btn title-btn" id="titleBtn" onclick="submitTitle()" disabled>CHECK</button>
-  </div>
-</div>
-
-<!-- MED/HARD actor phase: text + submit -->
-<div id="submitActorRow" style="display:none">
-  <div class="submit-row">
-    <input class="hard-txt" id="gActorInp" placeholder="Type actor name…" autocomplete="off"
-           oninput="onActorInp(this.value)" onkeydown="if(event.key==='Enter')submitActor()">
-    <button class="sub-btn" id="actorBtn" onclick="submitActor()" disabled>CHECK</button>
-  </div>
-</div>
-
-<!-- MED/HARD title phase: text + submit -->
-<div id="submitTitleRow" style="display:none">
-  <div class="submit-row">
-    <input class="hard-txt title-mode" id="gTitleInp2" placeholder="Type the connecting title…" autocomplete="off"
-           oninput="onTitleInp2(this.value)" onkeydown="if(event.key==='Enter')submitTitle2()">
-    <button class="sub-btn title-btn" id="titleBtn2" onclick="submitTitle2()" disabled>CHECK</button>
+<!-- TITLE phase: live search dropdown (all difficulties) -->
+<div id="titleRow" style="display:none">
+  <div class="srch-game-wrap">
+    <input class="srch-inp" id="gTitleSrchInp" placeholder="Search movie or show…" oninput="srchTitle(this.value)" autocomplete="off">
+    <div class="sug-list g-sug" id="gTitleSug"></div>
   </div>
 </div>
 
@@ -477,7 +458,7 @@ const G = {
 const IMG = (p,s='w92') => p ? `https://image.tmdb.org/t/p/${s}${p}` : null;
 const fmt = s => `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
 const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-const norm = s => (s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+
 
 /* ══════════════════════════════════════════
    TMDB
@@ -749,7 +730,7 @@ function updatePanel() {
   tabA.textContent = G.phase==='actor' ? '👤 Actor' : `✓ ${esc(G.pendingActor?.name||'Actor')}`;
 
   // Hide all input rows
-  ['easyActorRow','easyTitleRow','submitActorRow','submitTitleRow'].forEach(id=>
+  ['actorRow','titleRow'].forEach(id=>
     document.getElementById(id).style.display='none'
   );
   hideFeedback();
@@ -761,29 +742,17 @@ function updatePanel() {
     else
       hint.innerHTML=`Name an actor who appeared in a ${med} with <strong>${esc(prev.name)}</strong>`;
 
-    if (G.diff==='easy') {
-      document.getElementById('easyActorRow').style.display='block';
-      document.getElementById('gSrchInp').value='';
-      document.getElementById('gSug').innerHTML='';
-    } else {
-      document.getElementById('submitActorRow').style.display='block';
-      document.getElementById('gActorInp').value='';
-      document.getElementById('actorBtn').disabled=true;
-    }
+    document.getElementById('actorRow').style.display='block';
+    document.getElementById('gSrchInp').value='';
+    document.getElementById('gSug').innerHTML='';
     startStepTimer();
   } else {
     // TITLE PHASE
     hint.innerHTML=`What ${med} connects <strong>${esc(prev.name)}</strong> and <strong>${esc(G.pendingActor.name)}</strong>?`;
 
-    if (G.diff==='easy') {
-      document.getElementById('easyTitleRow').style.display='block';
-      document.getElementById('gTitleInp').value='';
-      document.getElementById('titleBtn').disabled=true;
-    } else {
-      document.getElementById('submitTitleRow').style.display='block';
-      document.getElementById('gTitleInp2').value='';
-      document.getElementById('titleBtn2').disabled=true;
-    }
+    document.getElementById('titleRow').style.display='block';
+    document.getElementById('gTitleSrchInp').value='';
+    document.getElementById('gTitleSug').innerHTML='';
     // Don't restart timer for title phase — same step
   }
 }
@@ -813,12 +782,9 @@ async function selGame(a) {
   document.getElementById('gSrchInp').value=a.name;
   hideFeedback();
 
-  // Validate the actor connects to previous
   const prev=G.chain[G.step-1]?.actor;
-  const N=G.chainLen;
-  const med=G.media==='tv'?'TV show':'movie';
+  const N=G.chainLen, med=G.media==='tv'?'TV show':'movie';
 
-  // Show loading
   showFeedback('info','Checking connection…');
   try {
     const sp=await sharedTitles(prev.id, a.id);
@@ -829,7 +795,6 @@ async function selGame(a) {
       document.getElementById('gSrchInp').value='';
       return;
     }
-    // If last middle slot, also check can reach end
     if (G.step===N-2) {
       const se=await sharedTitles(a.id, G.endActor.id);
       if (!se.length) {
@@ -838,149 +803,87 @@ async function selGame(a) {
         document.getElementById('gSrchInp').value='';
         return;
       }
-      G.pendingTitles = sp; // titles connecting prev → a
-      G.pendingActor  = a;
-      G.pendingActor._endTitles = se; // also store end titles
+      G.pendingTitles=sp; G.pendingActor=a; G.pendingActor._endTitles=se;
     } else {
-      G.pendingTitles = sp;
-      G.pendingActor  = a;
+      G.pendingTitles=sp; G.pendingActor=a;
     }
-    // Actor is valid — move to title phase
-    G.chain[G.step].actor = a; // tentatively place actor so it shows on chain
-    G.phase = 'title';
-    hideFeedback();
-    renderChain();
-    updatePanel();
-  } catch(e) {
-    showFeedback('bad','Something went wrong. Try again!');
-  }
-}
-
-/* ══════════════════════════════════════════
-   EASY — TITLE SUBMIT
-══════════════════════════════════════════ */
-function onTitleInp(v) {
-  document.getElementById('titleBtn').disabled = v.trim().length < 2;
-  hideFeedback();
-}
-
-async function submitTitle() {
-  const q = document.getElementById('gTitleInp').value.trim();
-  if (!q) return;
-  await checkTitle(q, document.getElementById('titleBtn'), document.getElementById('gTitleInp'));
-}
-
-/* ══════════════════════════════════════════
-   MED/HARD — ACTOR SUBMIT
-══════════════════════════════════════════ */
-function onActorInp(v) {
-  document.getElementById('actorBtn').disabled = v.trim().length < 2;
-  hideFeedback();
-}
-
-async function submitActor() {
-  const q = document.getElementById('gActorInp').value.trim();
-  if (!q) return;
-  const btn=document.getElementById('actorBtn');
-  btn.disabled=true; btn.textContent='…';
-  hideFeedback();
-
-  const prev=G.chain[G.step-1]?.actor;
-  const N=G.chainLen, med=G.media==='tv'?'TV show':'movie';
-
-  try {
-    const results=await findActors(q);
-    if (!results.length) {
-      G.wrongCount++;
-      showFeedback('bad', G.diff==='hard'?'✗ Incorrect':`✗ Couldn't find "${esc(q)}" — check spelling!`);
-      btn.disabled=false; btn.textContent='CHECK'; return;
-    }
-
-    // Try candidates
-    let found=false;
-    for (const candidate of results.slice(0,3)) {
-      if (G.usedActors.has(candidate.id)) continue;
-      const sp=await sharedTitles(prev.id, candidate.id);
-      if (!sp.length) continue;
-      if (G.step===N-2) {
-        const se=await sharedTitles(candidate.id, G.endActor.id);
-        if (!se.length) continue;
-        G.pendingActor=candidate; G.pendingTitles=sp; G.pendingActor._endTitles=se;
-      } else {
-        G.pendingActor=candidate; G.pendingTitles=sp;
-      }
-      found=true; break;
-    }
-
-    if (!found) {
-      G.wrongCount++;
-      if (G.diff==='hard') {
-        showFeedback('bad','✗ Incorrect — that actor doesn\'t work here.');
-      } else {
-        if (G.step===N-2)
-          showFeedback('bad',`✗ <strong>${esc(results[0].name)}</strong> doesn't bridge <strong>${esc(prev.name)}</strong> and <strong>${esc(G.endActor.name)}</strong> via a ${med}.`);
-        else
-          showFeedback('bad',`✗ <strong>${esc(results[0].name)}</strong> doesn't share a ${med} with <strong>${esc(prev.name)}</strong>.`);
-      }
-      flashNode(`nd${G.step-1}`);
-      btn.disabled=false; btn.textContent='CHECK'; return;
-    }
-
     // Actor valid — move to title phase
-    G.chain[G.step].actor = G.pendingActor;
+    G.chain[G.step].actor = a;
     G.phase='title';
     hideFeedback();
     renderChain(); updatePanel();
-    btn.textContent='CHECK';
   } catch(e) {
     showFeedback('bad','Something went wrong. Try again!');
-    btn.disabled=false; btn.textContent='CHECK';
   }
 }
 
 /* ══════════════════════════════════════════
-   MED/HARD — TITLE SUBMIT
+   TITLE SEARCH — live dropdown (all modes)
 ══════════════════════════════════════════ */
-function onTitleInp2(v) {
-  document.getElementById('titleBtn2').disabled = v.trim().length < 2;
-  hideFeedback();
+async function searchTitles(q) {
+  if (!q || q.length < 2) return [];
+  const ep = G.media==='movie' ? '/search/movie' : '/search/tv';
+  const d = await tmdb(ep, {query: q, include_adult: false});
+  return (d.results||[])
+    .filter(t => t.vote_count > 5 && !G.usedTitles.has(t.id))
+    .slice(0, 7)
+    .map(t => ({...t, title: t.title||t.name}));
 }
 
-async function submitTitle2() {
-  const q = document.getElementById('gTitleInp2').value.trim();
-  if (!q) return;
-  await checkTitle(q, document.getElementById('titleBtn2'), document.getElementById('gTitleInp2'));
+async function srchTitle(q) {
+  clearTimeout(G.srchTmr.t);
+  const el = document.getElementById('gTitleSug');
+  if (!q||q.length<2){el.innerHTML='';return;}
+  el.innerHTML=`<div class="sug-item"><div class="loading-dots"><span></span><span></span><span></span></div></div>`;
+  G.srchTmr.t = setTimeout(async()=>{
+    try {
+      const res = await searchTitles(q);
+      // Only show titles that are actually valid connections
+      const valid = res.filter(t => G.pendingTitles.some(pt => pt.id===t.id));
+      const icon = G.media==='tv'?'📺':'🎬';
+      if (!valid.length) {
+        // Show all results but greyed — they searched something that doesn't connect
+        el.innerHTML = res.length
+          ? res.map(t=>`<div class="sug-item" style="opacity:.45" title="Not a shared title">${icon} <div><div class="sug-nm">${esc(t.title)}</div><div class="sug-kn">${t.release_date?.slice(0,4)||t.first_air_date?.slice(0,4)||''} — not a match</div></div></div>`).join('')
+          : `<div class="sug-item" style="color:var(--muted)">No results</div>`;
+      } else {
+        el.innerHTML = valid.map(t => {
+          const year = t.release_date?.slice(0,4)||t.first_air_date?.slice(0,4)||'';
+          return `<div class="sug-item" onclick='selTitle(${JSON.stringify(t).replace(/'/g,"&#39;")})'><div class="sug-ph" style="display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--surf2)">${icon}</div><div><div class="sug-nm">${esc(t.title)}</div><div class="sug-kn">${year}</div></div></div>`;
+        }).join('');
+      }
+    } catch(e){el.innerHTML=`<div class="sug-item" style="color:var(--red)">Search error</div>`;}
+  }, 380);
 }
 
-/* ══════════════════════════════════════════
-   SHARED TITLE VALIDATION
-══════════════════════════════════════════ */
-async function checkTitle(q, btn, inp) {
-  btn.disabled=true; btn.textContent='…';
+async function selTitle(t) {
+  if (typeof t==='string') t=JSON.parse(t);
+  document.getElementById('gTitleSug').innerHTML='';
+  document.getElementById('gTitleSrchInp').value = t.title;
   hideFeedback();
 
-  const N=G.chainLen, step=G.step, med=G.media==='tv'?'TV show':'movie';
-  const prev=G.chain[step-1]?.actor;
-  const actor=G.pendingActor;
-  const validTitles=G.pendingTitles;
-
-  // Fuzzy match the typed title against valid shared titles
-  const qn=norm(q);
-  const match=validTitles.find(t => norm(t.title).includes(qn) || qn.includes(norm(t.title).slice(0,Math.max(4,norm(t.title).length-2))));
-
+  // Confirm it's in valid list
+  const match = G.pendingTitles.find(pt => pt.id===t.id);
   if (!match) {
     G.wrongCount++;
+    const prev=G.chain[G.step-1]?.actor;
+    const med=G.media==='tv'?'TV show':'movie';
     if (G.diff==='hard') {
       showFeedback('bad','✗ Incorrect title.');
     } else {
-      showFeedback('bad',`✗ <strong>${esc(q)}</strong> doesn't connect <strong>${esc(prev.name)}</strong> and <strong>${esc(actor.name)}</strong>. They were both in a different ${med} together — try again!`);
+      showFeedback('bad',`✗ <strong>${esc(t.title)}</strong> doesn't connect <strong>${esc(prev.name)}</strong> and <strong>${esc(G.pendingActor.name)}</strong> — try a different ${med}!`);
     }
-    btn.disabled=false; btn.textContent='CHECK'; return;
+    document.getElementById('gTitleSrchInp').value='';
+    return;
   }
 
-  // Title is correct! Commit this step
+  await commitTitle(match);
+}
+
+async function commitTitle(match) {
+  const N=G.chainLen, step=G.step, actor=G.pendingActor;
+
   if (step===N-2) {
-    // Also need to commit the title connecting actor → endActor
     const endTitles = actor._endTitles || await sharedTitles(actor.id, G.endActor.id);
     G.chain[step-1].title = match;
     G.chain[step].actor   = actor;
@@ -991,7 +894,7 @@ async function checkTitle(q, btn, inp) {
     G.step=N; G.phase='actor';
     killTimer(); renderChain();
     document.getElementById('inpPanel').style.display='none';
-    setTimeout(showWin,500);
+    setTimeout(showWin, 500);
   } else {
     G.chain[step-1].title = match;
     G.chain[step].actor   = actor;
@@ -1001,7 +904,6 @@ async function checkTitle(q, btn, inp) {
     G.pendingActor=null; G.pendingTitles=[];
     renderChain(); updatePanel();
   }
-  btn.textContent='CHECK';
 }
 
 /* ══════════════════════════════════════════
