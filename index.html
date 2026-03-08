@@ -148,17 +148,25 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
 .inline-inp{width:100%;background:var(–surf2);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;padding:13px 14px;color:var(–text);font-family:‘DM Sans’,sans-serif;font-size:16px;outline:none;transition:border-color .2s;-webkit-appearance:none}
 .inline-inp:focus{border-color:var(–gold)}
 .inline-sug{position:absolute;top:calc(100% + 6px);left:0;right:0;background:#2a2a2a;border-radius:12px;overflow:hidden;z-index:50;box-shadow:0 8px 30px rgba(0,0,0,.7);max-height:220px;overflow-y:auto}
+/* Submit button (med/hard) */
+.submit-btn{width:100%;min-height:48px;margin-top:10px;padding:12px;background:var(–surf2);color:var(–gold);border:1.5px solid var(–gold);border-radius:12px;font-family:‘Bebas Neue’,sans-serif;font-size:18px;letter-spacing:2px;cursor:pointer;transition:transform .15s,background .15s;-webkit-appearance:none;display:block}
+.submit-btn:active{transform:scale(.97);background:rgba(255,209,102,.12)}
+.submit-btn-title{color:var(–green);border-color:var(–green)}
+.submit-btn-title:active{background:rgba(6,214,160,.12)}
+/* Connector */
 .connector{display:flex;flex-direction:column;align-items:center}
 .conn-line{width:2px;height:10px;background:var(–conn)}
 .conn-pill{border-radius:10px;padding:6px 14px;font-size:12px;max-width:88%;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:1px solid rgba(255,255,255,.06);background:var(–surf2);color:var(–muted)}
 .conn-pill.filled-movie{color:var(–text);border-color:rgba(255,209,102,.25);background:rgba(255,209,102,.05)}
 .conn-pill.filled-tv{color:var(–text);border-color:rgba(124,58,237,.3);background:rgba(124,58,237,.06)}
+/* Title block */
 .title-block{padding:2px 14px 4px}
 .title-hint{font-size:11px;color:var(–muted);margin-bottom:6px;line-height:1.4}
 .title-srch-wrap{position:relative}
 .title-inp{width:100%;background:var(–surf2);border:1.5px solid rgba(255,209,102,.3);border-radius:12px;padding:13px 14px;color:var(–text);font-family:‘DM Sans’,sans-serif;font-size:16px;outline:none;transition:border-color .2s;-webkit-appearance:none}
 .title-inp:focus{border-color:var(–green)}
 .title-sug{position:absolute;top:calc(100% + 6px);left:0;right:0;background:#2a2a2a;border-radius:12px;overflow:hidden;z-index:50;box-shadow:0 8px 30px rgba(0,0,0,.7);max-height:220px;overflow-y:auto}
+/* Inline feedback */
 .inline-fb{margin-top:8px;border-radius:10px;padding:8px 12px;font-size:12px;font-weight:500;line-height:1.4;display:none}
 .inline-fb.bad{background:rgba(239,35,60,.12);color:#ff8095;border:1px solid rgba(239,35,60,.25);display:block}
 .inline-fb.ok{background:rgba(6,214,160,.12);color:var(–easy-c);border:1px solid rgba(6,214,160,.25);display:block}
@@ -228,17 +236,17 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
     <div class="diff-grid">
       <button class="diff-card sel-easy" id="dcEasy" onclick="setDiff('easy')">
         <span class="diff-icon">🟢</span>
-        <span class="diff-info"><span class="diff-name easy">Easy</span><span class="diff-desc">Wrong answers show exactly what failed</span></span>
+        <span class="diff-info"><span class="diff-name easy">Easy</span><span class="diff-desc">Live search — valid matches highlighted instantly</span></span>
         <span class="diff-check">✓</span>
       </button>
       <button class="diff-card" id="dcMed" onclick="setDiff('med')">
         <span class="diff-icon">🟡</span>
-        <span class="diff-info"><span class="diff-name med">Medium</span><span class="diff-desc">Wrong answers show which part failed</span></span>
+        <span class="diff-info"><span class="diff-name med">Medium</span><span class="diff-desc">Pick &amp; submit — wrong answers name the bad title</span></span>
         <span class="diff-check"></span>
       </button>
       <button class="diff-card" id="dcHard" onclick="setDiff('hard')">
         <span class="diff-icon">🔴</span>
-        <span class="diff-info"><span class="diff-name hard">Hard</span><span class="diff-desc">Only told right or wrong — no hints</span></span>
+        <span class="diff-info"><span class="diff-name hard">Hard</span><span class="diff-desc">Pick &amp; submit — only told "Incorrect", no hints</span></span>
         <span class="diff-check"></span>
       </button>
     </div>
@@ -338,20 +346,20 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
     <div class="modal-hnd"></div>
     <div class="modal-ttl">HOW TO PLAY</div>
     <div class="hw-step"><div class="hw-num">1</div><div class="hw-txt">Choose <strong>Movies</strong> or <strong>TV Shows</strong> — all connections must stay in that category.</div></div>
-    <div class="hw-step"><div class="hw-num">2</div><div class="hw-txt">Search boxes appear <strong>inline in the chain</strong>. First search the actor, then search the connecting movie/show below them.</div></div>
+    <div class="hw-step"><div class="hw-num">2</div><div class="hw-txt">Search an actor, pick from the dropdown, then search the connecting movie/show below them.</div></div>
     <div class="hw-step"><div class="hw-num">3</div><div class="hw-txt"><em>Example:</em> Leonardo DiCaprio → <strong>Wolf of Wall Street</strong> → Jonah Hill → <strong>21 Jump Street</strong> → Channing Tatum</div></div>
     <div class="hw-step"><div class="hw-num">4</div><div class="hw-txt">Pick a <strong>difficulty</strong>:</div></div>
     <div class="diff-legend">
-      <div class="dl-row"><div class="dl-dot" style="background:var(--easy-c)"></div><div><strong style="color:var(--easy-c)">Easy</strong> — Wrong answers tell you exactly what failed.</div></div>
-      <div class="dl-row"><div class="dl-dot" style="background:var(--med-c)"></div><div><strong style="color:var(--med-c)">Medium</strong> — Wrong answers say which part was wrong.</div></div>
-      <div class="dl-row"><div class="dl-dot" style="background:var(--hard-c)"></div><div><strong style="color:var(--hard-c)">Hard</strong> — Wrong answers only say "Incorrect" — no hints!</div></div>
+      <div class="dl-row"><div class="dl-dot" style="background:var(--easy-c)"></div><div><strong style="color:var(--easy-c)">Easy</strong> — Valid matches highlighted in search. Wrong answers show exactly what failed.</div></div>
+      <div class="dl-row"><div class="dl-dot" style="background:var(--med-c)"></div><div><strong style="color:var(--med-c)">Medium</strong> — Pick actor &amp; title, then hit Submit. Wrong answers name the bad pick.</div></div>
+      <div class="dl-row"><div class="dl-dot" style="background:var(--hard-c)"></div><div><strong style="color:var(--hard-c)">Hard</strong> — Pick actor &amp; title, then hit Submit. Only told "Incorrect" — no hints!</div></div>
     </div>
     <div class="hw-step"><div class="hw-num">5</div><div class="hw-txt"><strong>No repeats</strong> — the same actor or title can't appear twice in the chain.</div></div>
   </div>
 </div>
 
 <script>
-const G={apiKey:localStorage.getItem('tmdb_key')||'',media:'movie',diff:'easy',chainLen:5,timerOn:false,timerIv:null,timerSec:90,startActor:null,endActor:null,chain:[],usedActors:new Set(),usedTitles:new Set(),step:0,phase:'actor',pendingActor:null,pendingTitles:[],srchTmr:{},gameTs:0,wrongCount:0};
+const G={apiKey:localStorage.getItem('tmdb_key')||'',media:'movie',diff:'easy',chainLen:5,timerOn:false,timerIv:null,timerSec:90,startActor:null,endActor:null,chain:[],usedActors:new Set(),usedTitles:new Set(),step:0,phase:'actor',pendingActor:null,pendingTitles:[],pendingActorInput:null,pendingTitleInput:null,srchTmr:{},gameTs:0,wrongCount:0};
 const IMG=(p,s='w92')=>p?`https://image.tmdb.org/t/p/${s}${p}`:null;
 const fmt=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
 const esc=s=>(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
@@ -376,38 +384,16 @@ function closeHow(){const m=document.getElementById('howModal');m.classList.remo
 document.getElementById('howModal').addEventListener('click',e=>{if(e.target.id==='howModal')closeHow();});
 
 // RANDOMIZER
-const POPULAR_ACTORS=[
-  'Tom Hanks','Meryl Streep','Leonardo DiCaprio','Scarlett Johansson','Denzel Washington',
-  'Cate Blanchett','Brad Pitt','Jennifer Lawrence','Will Smith','Natalie Portman',
-  'Ryan Reynolds','Emma Stone','Chris Evans','Margot Robbie','Robert Downey Jr',
-  'Anne Hathaway','Matt Damon','Charlize Theron','Samuel L Jackson','Viola Davis',
-  'Tom Cruise','Julia Roberts','Christian Bale','Halle Berry','Jake Gyllenhaal',
-  'Reese Witherspoon','Mark Wahlberg','Amy Adams','Joaquin Phoenix','Sandra Bullock',
-  'Benedict Cumberbatch','Zoe Saldana','Hugh Jackman','Lupita Nyongo','Idris Elba',
-  'Nicole Kidman','Chris Hemsworth','Awkwafina','Adam Driver','Taraji P Henson'
-];
-
+const POPULAR_ACTORS=['Tom Hanks','Meryl Streep','Leonardo DiCaprio','Scarlett Johansson','Denzel Washington','Cate Blanchett','Brad Pitt','Jennifer Lawrence','Will Smith','Natalie Portman','Ryan Reynolds','Emma Stone','Chris Evans','Margot Robbie','Robert Downey Jr','Anne Hathaway','Matt Damon','Charlize Theron','Samuel L Jackson','Viola Davis','Tom Cruise','Julia Roberts','Christian Bale','Halle Berry','Jake Gyllenhaal','Reese Witherspoon','Mark Wahlberg','Amy Adams','Joaquin Phoenix','Sandra Bullock','Benedict Cumberbatch','Zoe Saldana','Hugh Jackman','Lupita Nyongo','Idris Elba','Nicole Kidman','Chris Hemsworth','Awkwafina','Adam Driver','Taraji P Henson'];
 async function randomizePair(){
-  const btn=document.getElementById('randBtn');
-  btn.classList.add('loading');
-  btn.textContent='🎲 Finding Stars…';
-  const err=document.getElementById('setupErr');
-  err.textContent='';
+  const btn=document.getElementById('randBtn');btn.classList.add('loading');btn.textContent='🎲 Finding Stars…';
+  const err=document.getElementById('setupErr');err.textContent='';
   try{
-    const shuffled=[...POPULAR_ACTORS].sort(()=>Math.random()-.5);
-    let a1=null,a2=null;
-    for(let i=0;i<shuffled.length&&(!a1||!a2);i++){
-      const res=await findActors(shuffled[i]);
-      if(res.length){
-        if(!a1)a1=res[0];
-        else if(res[0].id!==a1.id)a2=res[0];
-      }
-    }
-    if(a1&&a2){selSetup('start',a1);selSetup('end',a2);}
-    else{err.textContent='Could not load random actors — try again!';}
+    const shuffled=[...POPULAR_ACTORS].sort(()=>Math.random()-.5);let a1=null,a2=null;
+    for(let i=0;i<shuffled.length&&(!a1||!a2);i++){const res=await findActors(shuffled[i]);if(res.length){if(!a1)a1=res[0];else if(res[0].id!==a1.id)a2=res[0];}}
+    if(a1&&a2){selSetup('start',a1);selSetup('end',a2);}else{err.textContent='Could not load random actors — try again!';}
   }catch(e){err.textContent='Error loading actors. Check your API key.';}
-  btn.classList.remove('loading');
-  btn.innerHTML='🎲 RANDOMIZE STARS';
+  btn.classList.remove('loading');btn.innerHTML='🎲 RANDOMIZE STARS';
 }
 
 async function srchSetup(role,q){clearTimeout(G.srchTmr[role]);const el=document.getElementById(role+'Sug');if(!q||q.length<2){el.innerHTML='';return;}el.innerHTML=`<div class="sug-item"><div class="loading-dots"><span></span><span></span><span></span></div></div>`;G.srchTmr[role]=setTimeout(async()=>{try{const res=await findActors(q);el.innerHTML=res.length?res.map(a=>`<div class="sug-item" onclick='selSetup("${role}",${JSON.stringify(a).replace(/'/g,"&#39;")})'>${a.profile_path?`<img class="sug-ph" src="${IMG(a.profile_path)}"/>`:`<div class="sug-ph" style="display:flex;align-items:center;justify-content:center;font-size:17px">👤</div>`}<div><div class="sug-nm">${esc(a.name)}</div><div class="sug-kn">${a.known_for_department||'Acting'}</div></div></div>`).join(''):`<div class="sug-item" style="color:var(--muted)">No results</div>`;}catch(e){el.innerHTML=`<div class="sug-item" style="color:var(--red)">Error</div>`;}},380);}
@@ -415,16 +401,17 @@ function selSetup(role,a){if(typeof a==='string')a=JSON.parse(a);G[role==='start
 function clearSetup(role){G[role==='start'?'startActor':'endActor']=null;document.getElementById(role+'Wrap').innerHTML=`<input class="srch-inp" id="${role}Inp" placeholder="Search actor or actress…" oninput="srchSetup('${role}',this.value)" autocomplete="off"><div class="sug-list" id="${role}Sug"></div>`;chkReady();}
 function chkReady(){const ok=G.startActor&&G.endActor&&G.startActor.id!==G.endActor.id;document.getElementById('playBtn').classList.toggle('dim',!ok);document.getElementById('setupErr').textContent=(G.startActor&&G.endActor&&G.startActor.id===G.endActor.id)?'Pick two different actors!':'';}
 
-function startGame(){killTimer();G.chain=new Array(G.chainLen).fill(null).map(()=>({actor:null,title:null}));G.usedActors=new Set([G.startActor.id,G.endActor.id]);G.usedTitles=new Set();G.step=1;G.phase='actor';G.pendingActor=null;G.pendingTitles=[];G.gameTs=Date.now();G.wrongCount=0;G.chain[0].actor=G.startActor;G.chain[G.chainLen-1].actor=G.endActor;const mp=document.getElementById('mPill');mp.textContent=G.media==='movie'?'🎬 MOVIE':'📺 TV';mp.className=`mpill ${G.media}`;const dp=document.getElementById('dPill');dp.textContent={easy:'🟢 EASY',med:'🟡 MEDIUM',hard:'🔴 HARD'}[G.diff];dp.className=`dpill ${G.diff}`;goScreen('game');renderChain();startStepTimer();}
+function startGame(){killTimer();G.chain=new Array(G.chainLen).fill(null).map(()=>({actor:null,title:null}));G.usedActors=new Set([G.startActor.id,G.endActor.id]);G.usedTitles=new Set();G.step=1;G.phase='actor';G.pendingActor=null;G.pendingTitles=[];G.pendingActorInput=null;G.pendingTitleInput=null;G.gameTs=Date.now();G.wrongCount=0;G.chain[0].actor=G.startActor;G.chain[G.chainLen-1].actor=G.endActor;const mp=document.getElementById('mPill');mp.textContent=G.media==='movie'?'🎬 MOVIE':'📺 TV';mp.className=`mpill ${G.media}`;const dp=document.getElementById('dPill');dp.textContent={easy:'🟢 EASY',med:'🟡 MEDIUM',hard:'🔴 HARD'}[G.diff];dp.className=`dpill ${G.diff}`;goScreen('game');renderChain();startStepTimer();}
 function retryGame(){startGame();}
-
 function startStepTimer(){killTimer();if(!G.timerOn)return;G.timerSec=90;document.getElementById('timerDisp').style.display='block';drawTimer();G.timerIv=setInterval(()=>{G.timerSec--;drawTimer();if(G.timerSec<=0){killTimer();handleTimeout();}},1000);}
 function killTimer(){clearInterval(G.timerIv);G.timerIv=null;}
 function drawTimer(){const el=document.getElementById('timerDisp'),s=G.timerSec;el.textContent=fmt(s);el.className='timer-disp'+(s<=10?' dngr':s<=30?' warn':'');}
 function handleTimeout(){document.getElementById('toSub').textContent=`You ran out of time on step ${G.step}.`;goScreen('timeout');}
 
+// ── RENDER ──
 function renderChain(){
   const N=G.chainLen,isTV=G.media==='tv',icon=isTV?'📺':'🎬';
+  const mh=(G.diff==='med'||G.diff==='hard'); // med/hard needs submit buttons
   const scroll=document.getElementById('chainScroll');
   let h='';
   for(let i=0;i<N;i++){
@@ -458,14 +445,19 @@ function renderChain(){
       const hint=(i===N-2)
         ?'Actor connecting <strong>'+esc(prevActor?.name||'')+'</strong> → <strong>'+esc(G.endActor?.name||'')+'</strong>'
         :'Actor who shares a '+med+' with <strong>'+esc(prevActor?.name||'')+'</strong>';
+      const stagedVal=mh&&G.pendingActorInput?esc(G.pendingActorInput.name):'';
+      const showSubmit=mh&&!!G.pendingActorInput;
+      // oninput: for easy, do live search; for med/hard, search then stage
+      const oninput=mh?`srchActorMH(${i},this.value)`:`srchActor(${i},this.value)`;
       h+='<div class="'+sc+'" id="slot'+i+'">'
         +'<span class="af-badge '+bc+'">'+bt+'</span>'
         +'<div class="actor-search">'
         +'<div class="slot-label">👤 '+hint+'</div>'
         +'<div class="inline-srch-wrap">'
-        +'<input class="inline-inp" id="actorInp'+i+'" placeholder="Search actor…" oninput="srchActor('+i+',this.value)" autocomplete="off">'
+        +'<input class="inline-inp" id="actorInp'+i+'" placeholder="Search actor…" oninput="'+oninput+'" autocomplete="off"'+(stagedVal?' value="'+stagedVal+'"':'')+'>'
         +'<div class="inline-sug" id="actorSug'+i+'"></div>'
         +'</div>'
+        +(showSubmit?'<button class="submit-btn" onclick="submitActor('+i+')">✓ SUBMIT ACTOR</button>':'')
         +'<div class="inline-fb" id="actorFb'+i+'"></div>'
         +'</div></div>';
     } else {
@@ -488,13 +480,17 @@ function renderChain(){
         const topActor=G.chain[i]?.actor;
         const botActor=(i===N-2)?G.endActor:G.pendingActor;
         const med=isTV?'TV show':'movie';
+        const stagedTitleVal=mh&&G.pendingTitleInput?esc(G.pendingTitleInput.title||G.pendingTitleInput.name||''):'';
+        const showTitleSubmit=mh&&!!G.pendingTitleInput;
+        const titleOninput=mh?`srchTitleMH(${i},this.value)`:`srchTitleInline(${i},this.value)`;
         h+='<div class="connector"><div class="conn-line"></div></div>'
           +'<div class="title-block" id="titleBlock'+i+'">'
           +'<div class="title-hint">'+icon+' What '+med+' connects <strong>'+esc(topActor?.name||'')+'</strong> and <strong>'+esc(botActor?.name||'')+'</strong>?</div>'
           +'<div class="title-srch-wrap">'
-          +'<input class="title-inp" id="titleInp'+i+'" placeholder="Search '+med+'…" oninput="srchTitleInline('+i+',this.value)" autocomplete="off">'
+          +'<input class="title-inp" id="titleInp'+i+'" placeholder="Search '+med+'…" oninput="'+titleOninput+'" autocomplete="off"'+(stagedTitleVal?' value="'+stagedTitleVal+'"':'')+'>'
           +'<div class="title-sug" id="titleSug'+i+'"></div>'
           +'</div>'
+          +(showTitleSubmit?'<button class="submit-btn submit-btn-title" onclick="submitTitle('+i+')">✓ SUBMIT TITLE</button>':'')
           +'<div class="inline-fb" id="titleFb'+i+'"></div>'
           +'</div>'
           +'<div class="connector"><div class="conn-line"></div></div>';
@@ -512,6 +508,7 @@ function renderChain(){
   },120);
 }
 
+// ── EASY: live actor search (validates immediately on pick) ──
 async function srchActor(idx,q){
   clearTimeout(G.srchTmr[`a${idx}`]);
   const el=document.getElementById(`actorSug${idx}`);
@@ -523,6 +520,63 @@ async function srchActor(idx,q){
   },380);
 }
 
+// ── MED/HARD: actor search — picks stage the answer, submit validates ──
+function srchActorMH(idx,q){
+  // Clear any staged pick when user types again
+  if(G.pendingActorInput){G.pendingActorInput=null;renderChain();}
+  clearTimeout(G.srchTmr[`a${idx}`]);
+  const el=document.getElementById(`actorSug${idx}`);
+  if(!q||q.length<2){if(el)el.innerHTML='';return;}
+  if(el)el.innerHTML=`<div class="sug-item"><div class="loading-dots"><span></span><span></span><span></span></div></div>`;
+  G.srchTmr[`a${idx}`]=setTimeout(async()=>{
+    try{
+      const res=await findActors(q);const fil=res.filter(a=>!G.usedActors.has(a.id));
+      const sugEl=document.getElementById(`actorSug${idx}`);
+      if(sugEl)sugEl.innerHTML=fil.length?fil.map(a=>`<div class="sug-item" onclick='stageActor(${idx},${JSON.stringify(a).replace(/'/g,"&#39;")})'>${a.profile_path?`<img class="sug-ph" src="${IMG(a.profile_path)}"/>`:`<div class="sug-ph" style="display:flex;align-items:center;justify-content:center;font-size:17px">👤</div>`}<div><div class="sug-nm">${esc(a.name)}</div><div class="sug-kn">${a.known_for_department||'Acting'}</div></div></div>`).join(''):`<div class="sug-item" style="color:var(--muted)">No results</div>`;
+    }catch(e){const sugEl=document.getElementById(`actorSug${idx}`);if(sugEl)sugEl.innerHTML=`<div class="sug-item" style="color:var(--red)">Search error</div>`;}
+  },380);
+}
+
+function stageActor(idx,a){
+  if(typeof a==='string')a=JSON.parse(a);
+  G.pendingActorInput=a;
+  renderChain();
+}
+
+async function submitActor(idx){
+  const a=G.pendingActorInput;if(!a)return;
+  const fb=document.getElementById(`actorFb${idx}`);
+  const inp=document.getElementById(`actorInp${idx}`);
+  const prev=G.chain[G.step-1]?.actor;
+  const N=G.chainLen,med=G.media==='tv'?'TV show':'movie';
+  setFb(fb,'info','Checking…');
+  try{
+    const sp=await sharedTitles(prev.id,a.id);
+    if(!sp.length){
+      G.wrongCount++;
+      if(G.diff==='hard')setFb(fb,'bad','✗ Incorrect.');
+      else setFb(fb,'bad',`✗ <strong>${esc(a.name)}</strong> doesn't share a ${med} with <strong>${esc(prev.name)}</strong>.`);
+      G.pendingActorInput=null;if(inp){inp.value='';inp.focus();}flashSlot(`slot${idx-1}`);renderChain();return;
+    }
+    if(G.step===N-2){
+      const se=await sharedTitles(a.id,G.endActor.id);
+      if(!se.length){
+        G.wrongCount++;
+        if(G.diff==='hard')setFb(fb,'bad','✗ Incorrect.');
+        else setFb(fb,'bad',`✗ <strong>${esc(a.name)}</strong> can't connect to <strong>${esc(G.endActor.name)}</strong> via a ${med}.`);
+        G.pendingActorInput=null;if(inp){inp.value='';inp.focus();}renderChain();return;
+      }
+      G.pendingActor=a;G.pendingTitles=sp;a._endTitles=se;
+    } else {
+      G.pendingActor=a;G.pendingTitles=sp;
+    }
+    G.pendingActorInput=null;G.pendingTitleInput=null;
+    G.chain[G.step].actor=a;G.phase='title';renderChain();
+    setTimeout(()=>{const ti=document.getElementById(`titleInp${G.step-1}`);if(ti)ti.focus();},150);
+  }catch(e){setFb(fb,'bad','Something went wrong.');}
+}
+
+// ── EASY: pick actor immediately validates ──
 async function pickActor(idx,a){
   if(typeof a==='string')a=JSON.parse(a);
   const sug=document.getElementById(`actorSug${idx}`);const inp=document.getElementById(`actorInp${idx}`);const fb=document.getElementById(`actorFb${idx}`);
@@ -531,14 +585,15 @@ async function pickActor(idx,a){
   setFb(fb,'info','Checking…');
   try{
     const sp=await sharedTitles(prev.id,a.id);
-    if(!sp.length){G.wrongCount++;if(G.diff==='hard')setFb(fb,'bad','✗ Incorrect.');else setFb(fb,'bad',`✗ <strong>${esc(a.name)}</strong> doesn't share a ${med} with <strong>${esc(prev.name)}</strong>.`);if(inp){inp.value='';inp.focus();}flashSlot(`slot${idx-1}`);return;}
-    if(G.step===N-2){const se=await sharedTitles(a.id,G.endActor.id);if(!se.length){G.wrongCount++;if(G.diff==='hard')setFb(fb,'bad','✗ Incorrect.');else setFb(fb,'bad',`✗ <strong>${esc(a.name)}</strong> can't connect to <strong>${esc(G.endActor.name)}</strong> via a ${med}.`);if(inp){inp.value='';inp.focus();}return;}G.pendingActor=a;G.pendingTitles=sp;a._endTitles=se;}
+    if(!sp.length){G.wrongCount++;setFb(fb,'bad',`✗ <strong>${esc(a.name)}</strong> doesn't share a ${med} with <strong>${esc(prev.name)}</strong>.`);if(inp){inp.value='';inp.focus();}flashSlot(`slot${idx-1}`);return;}
+    if(G.step===N-2){const se=await sharedTitles(a.id,G.endActor.id);if(!se.length){G.wrongCount++;setFb(fb,'bad',`✗ <strong>${esc(a.name)}</strong> can't connect to <strong>${esc(G.endActor.name)}</strong> via a ${med}.`);if(inp){inp.value='';inp.focus();}return;}G.pendingActor=a;G.pendingTitles=sp;a._endTitles=se;}
     else{G.pendingActor=a;G.pendingTitles=sp;}
     G.chain[G.step].actor=a;G.phase='title';renderChain();
     setTimeout(()=>{const ti=document.getElementById(`titleInp${G.step-1}`);if(ti)ti.focus();},150);
   }catch(e){setFb(fb,'bad','Something went wrong.');}
 }
 
+// ── EASY: title search shows valid/invalid highlighted ──
 async function srchTitleInline(connIdx,q){
   clearTimeout(G.srchTmr[`t${connIdx}`]);
   const el=document.getElementById(`titleSug${connIdx}`);
@@ -553,6 +608,46 @@ async function srchTitleInline(connIdx,q){
   },380);
 }
 
+// ── MED/HARD: title search — shows all results equally (no hint which are valid) ──
+function srchTitleMH(connIdx,q){
+  if(G.pendingTitleInput){G.pendingTitleInput=null;renderChain();}
+  clearTimeout(G.srchTmr[`t${connIdx}`]);
+  const el=document.getElementById(`titleSug${connIdx}`);
+  if(!q||q.length<2){if(el)el.innerHTML='';return;}
+  if(el)el.innerHTML=`<div class="sug-item"><div class="loading-dots"><span></span><span></span><span></span></div></div>`;
+  G.srchTmr[`t${connIdx}`]=setTimeout(async()=>{
+    try{
+      const res=await searchTitles(q);const icon=G.media==='tv'?'📺':'🎬';
+      const sugEl=document.getElementById(`titleSug${connIdx}`);
+      if(sugEl)sugEl.innerHTML=res.length?res.map(t=>{const yr=t.release_date?.slice(0,4)||t.first_air_date?.slice(0,4)||'';return`<div class="sug-item" onclick='stageTitle(${connIdx},${JSON.stringify(t).replace(/'/g,"&#39;")})'><div class="sug-ph" style="display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--surf2)">${icon}</div><div><div class="sug-nm">${esc(t.title)}</div><div class="sug-kn">${yr}</div></div></div>`;}).join(''):`<div class="sug-item" style="color:var(--muted)">No results</div>`;
+    }catch(e){const sugEl=document.getElementById(`titleSug${connIdx}`);if(sugEl)sugEl.innerHTML=`<div class="sug-item" style="color:var(--red)">Search error</div>`;}
+  },380);
+}
+
+function stageTitle(connIdx,t){
+  if(typeof t==='string')t=JSON.parse(t);
+  G.pendingTitleInput=t;
+  renderChain();
+}
+
+async function submitTitle(connIdx){
+  const t=G.pendingTitleInput;if(!t)return;
+  const fb=document.getElementById(`titleFb${connIdx}`);
+  const inp=document.getElementById(`titleInp${connIdx}`);
+  const match=G.pendingTitles.find(pt=>pt.id===t.id);
+  if(!match){
+    G.wrongCount++;
+    const med=G.media==='tv'?'TV show':'movie';
+    if(G.diff==='hard')setFb(fb,'bad','✗ Incorrect.');
+    else setFb(fb,'bad',`✗ <strong>${esc(t.title||t.name||'')}</strong> doesn't connect those two actors — try another ${med}!`);
+    G.pendingTitleInput=null;if(inp){inp.value='';inp.focus();}renderChain();return;
+  }
+  G.pendingTitleInput=null;
+  if(connIdx===G.chainLen-2)await commitEndTitle(match);
+  else await commitStep(match);
+}
+
+// ── EASY: pick title immediately validates ──
 async function pickTitle(connIdx,t){
   if(typeof t==='string')t=JSON.parse(t);
   const fb=document.getElementById(`titleFb${connIdx}`);
@@ -562,42 +657,34 @@ async function pickTitle(connIdx,t){
     const med=G.media==='tv'?'TV show':'movie';
     const topActor=G.chain[connIdx]?.actor;
     const botActor=connIdx===G.chainLen-2?G.endActor:G.pendingActor;
-    if(G.diff==='hard')setFb(fb,'bad','✗ Incorrect title.');
-    else setFb(fb,'bad',`✗ <strong>${esc(t.title)}</strong> doesn't connect <strong>${esc(topActor?.name||'')}</strong> and <strong>${esc(botActor?.name||'')}</strong> — try another ${med}!`);
+    setFb(fb,'bad',`✗ <strong>${esc(t.title)}</strong> doesn't connect <strong>${esc(topActor?.name||'')}</strong> and <strong>${esc(botActor?.name||'')}</strong> — try another ${med}!`);
     const inp=document.getElementById(`titleInp${connIdx}`);
     if(inp){inp.value='';inp.focus();}
     return;
   }
-  if(connIdx===G.chainLen-2) await commitEndTitle(match);
+  if(connIdx===G.chainLen-2)await commitEndTitle(match);
   else await commitStep(match);
 }
 
 async function commitStep(match){
   const N=G.chainLen,step=G.step,actor=G.pendingActor;
   if(step===N-2){
-    G.chain[step-1].title=match;
-    G.chain[step].actor=actor;
-    G.usedActors.add(actor.id);
-    G.usedTitles.add(match.id);
+    G.chain[step-1].title=match;G.chain[step].actor=actor;G.usedActors.add(actor.id);G.usedTitles.add(match.id);
     G.pendingTitles=actor._endTitles||await sharedTitles(actor.id,G.endActor.id);
-    G.pendingActor=actor;
-    G.step=N-1;
-    G.phase='title';
-    renderChain();
-    setTimeout(()=>{const ti=document.getElementById('titleInp'+(N-2));if(ti)ti.focus();},150);
+    G.pendingActor=actor;G.step=N-1;G.phase='title';G.pendingTitleInput=null;
+    renderChain();setTimeout(()=>{const ti=document.getElementById('titleInp'+(N-2));if(ti)ti.focus();},150);
   } else {
-    G.chain[step-1].title=match;G.chain[step].actor=actor;G.usedActors.add(actor.id);G.usedTitles.add(match.id);G.step++;G.phase='actor';G.pendingActor=null;G.pendingTitles=[];renderChain();startStepTimer();setTimeout(()=>{const el=document.getElementById(`actorInp${G.step}`);if(el)el.focus();},150);
+    G.chain[step-1].title=match;G.chain[step].actor=actor;G.usedActors.add(actor.id);G.usedTitles.add(match.id);
+    G.step++;G.phase='actor';G.pendingActor=null;G.pendingTitles=[];G.pendingActorInput=null;G.pendingTitleInput=null;
+    renderChain();startStepTimer();setTimeout(()=>{const el=document.getElementById(`actorInp${G.step}`);if(el)el.focus();},150);
   }
 }
 
 async function commitEndTitle(match){
   const N=G.chainLen;
-  G.chain[N-2].title=match;
-  G.usedTitles.add(match.id);
-  G.step=N;G.phase='actor';
-  G.pendingActor=null;G.pendingTitles=[];
-  killTimer();renderChain();
-  setTimeout(showWin,600);
+  G.chain[N-2].title=match;G.usedTitles.add(match.id);
+  G.step=N;G.phase='actor';G.pendingActor=null;G.pendingTitles=[];G.pendingActorInput=null;G.pendingTitleInput=null;
+  killTimer();renderChain();setTimeout(showWin,600);
 }
 
 function setFb(el,type,html){if(!el)return;el.className=`inline-fb ${type}`;el.innerHTML=html;}
