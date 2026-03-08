@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Star Chain</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#FFD166;--red:#EF233C;--dark:#0D0D0D;--surf:#1A1A1A;--surf2:#252525;--text:#F0EDE8;--muted:#777;--green:#06D6A0;--conn:#2A2A2A;--easy-c:#06D6A0;--med-c:#FFD166;--hard-c:#EF233C}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--text);min-height:100dvh;overflow-x:hidden}
+.screen{display:none;flex-direction:column;min-height:100dvh}
+.screen.active{display:flex}
+.back-btn{width:38px;height:38px;border-radius:10px;background:var(--surf);border:none;color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.screen-hdr{padding:18px 18px 0;display:flex;align-items:center;gap:12px}
+.screen-title{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:3px;color:var(--gold)}
+.scr-body{padding:20px 18px;flex:1;overflow-y:auto}
+.sec-lbl{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.err-msg{font-size:12px;color:var(--red);margin-top:6px;text-align:center;min-height:16px}
+.gold-btn{width:100%;padding:15px;background:var(--gold);color:var(--dark);border:none;border-radius:14px;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;cursor:pointer;transition:all .2s;box-shadow:0 6px 20px rgba(255,209,102,.22)}
+.gold-btn:active{transform:scale(.97)}
+.gold-btn.dim{opacity:.38;pointer-events:none;box-shadow:none}
+.toggle-sw{width:46px;height:26px;background:var(--conn);border-radius:13px;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;border:none}
+.toggle-sw.on{background:var(--green)}
+.toggle-sw::after{content:'';position:absolute;width:20px;height:20px;border-radius:50%;background:#fff;top:3px;left:3px;transition:transform .2s;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.toggle-sw.on::after{transform:translateX(20px)}
+.loading-dots{display:inline-flex;gap:4px;align-items:center}
+.loading-dots span{width:5px;height:5px;border-radius:50%;background:var(--muted);animation:ldot 1.2s infinite}
+.loading-dots span:nth-child(2){animation-delay:.2s}
+.loading-dots span:nth-child(3){animation-delay:.4s}
+@keyframes ldot{0%,80%,100%{opacity:.2}40%{opacity:1}}
+#home{align-items:center;justify-content:center;padding:24px 18px 36px;background:var(--dark);position:relative;overflow:hidden;gap:0}
+#home::before{content:'';position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(239,35,60,.12) 0%,transparent 70%);top:-150px;right:-200px;pointer-events:none}
+#home::after{content:'';position:absolute;width:400px;height:400px;background:radial-gradient(circle,rgba(255,209,102,.07) 0%,transparent 70%);bottom:-100px;left:-100px;pointer-events:none}
+.logo-wrap{display:flex;flex-direction:column;align-items:center;margin-bottom:26px;position:relative;z-index:1}
+.logo-icon{font-size:50px;line-height:1;margin-bottom:6px;animation:pulse 3s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.logo-title{font-family:'Bebas Neue',sans-serif;font-size:64px;letter-spacing:6px;color:var(--gold);line-height:1;text-shadow:0 0 40px rgba(255,209,102,.3)}
+.logo-sub{font-size:12px;letter-spacing:4px;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.home-card{background:var(--surf);border-radius:22px;padding:20px 18px;width:100%;max-width:390px;position:relative;z-index:1;border:1px solid rgba(255,255,255,.06)}
+.two-toggle{display:flex;background:var(--surf2);border-radius:14px;padding:4px;margin-bottom:18px;gap:4px}
+.ttbtn{flex:1;padding:11px 6px;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;border-radius:10px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px}
+.ttbtn.am{background:#2563EB;color:#fff;box-shadow:0 4px 14px rgba(37,99,235,.4)}
+.ttbtn.at{background:#7C3AED;color:#fff;box-shadow:0 4px 14px rgba(124,58,237,.4)}
+.diff-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:18px}
+.diff-card{border-radius:14px;padding:14px 16px;cursor:pointer;border:2px solid transparent;transition:all .2s;background:var(--surf2);display:flex;align-items:center;gap:14px}
+.diff-card:active{transform:scale(.98)}
+.diff-card.sel-easy{border-color:var(--easy-c);background:rgba(6,214,160,.08)}
+.diff-card.sel-med{border-color:var(--med-c);background:rgba(255,209,102,.07)}
+.diff-card.sel-hard{border-color:var(--hard-c);background:rgba(239,35,60,.08)}
+.diff-icon{font-size:26px;flex-shrink:0}
+.diff-info{flex:1}
+.diff-name{font-size:15px;font-weight:700;margin-bottom:2px}
+.diff-desc{font-size:12px;color:var(--muted);line-height:1.4}
+.diff-name.easy{color:var(--easy-c)}.diff-name.med{color:var(--med-c)}.diff-name.hard{color:var(--hard-c)}
+.diff-check{width:22px;height:22px;border-radius:50%;border:2px solid rgba(255,255,255,.15);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .2s}
+.diff-card.sel-easy .diff-check{background:var(--easy-c);border-color:var(--easy-c);color:var(--dark)}
+.diff-card.sel-med .diff-check{background:var(--med-c);border-color:var(--med-c);color:var(--dark)}
+.diff-card.sel-hard .diff-check{background:var(--hard-c);border-color:var(--hard-c);color:#fff}
+.slider-row{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:7px}
+.slider-val{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--gold);letter-spacing:2px;line-height:1}
+.slider-sub{font-size:12px;color:var(--muted)}
+input[type=range]{width:100%;-webkit-appearance:none;background:var(--surf2);border-radius:8px;height:8px;outline:none;margin-bottom:5px;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:var(--gold);box-shadow:0 2px 8px rgba(255,209,102,.4);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--gold);border:none;cursor:pointer}
+.slider-ticks{display:flex;justify-content:space-between;margin-bottom:16px;padding:0 2px}
+.slider-tick{font-size:10px;color:var(--muted)}
+.opt-row{display:flex;align-items:center;justify-content:space-between;background:var(--surf2);border-radius:12px;padding:11px 14px;margin-bottom:18px}
+.opt-lbl{font-size:14px;font-weight:500}
+.opt-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.how-link{text-align:center;margin-top:14px;font-size:13px;color:var(--muted);cursor:pointer;text-decoration:underline;position:relative;z-index:1}
+#apisetup{padding:0;background:var(--dark)}
+.api-warn{background:rgba(239,35,60,.1);border:1px solid rgba(239,35,60,.3);border-radius:12px;padding:13px 15px;margin-bottom:18px;font-size:13px;color:#ffaaaa;line-height:1.6}
+.inp-wrap label{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:7px}
+.txt-inp{width:100%;background:var(--surf2);border:1.5px solid rgba(255,255,255,.08);border-radius:12px;padding:12px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s;margin-bottom:14px}
+.txt-inp:focus{border-color:var(--gold)}
+.red-btn{width:100%;padding:13px;background:var(--red);color:#fff;border:none;border-radius:12px;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;cursor:pointer;transition:all .2s}
+.red-btn:active{transform:scale(.97)}
+#setup{padding:0;background:var(--dark)}
+.as-card{background:var(--surf);border-radius:18px;padding:18px;margin-bottom:14px;border:1px solid rgba(255,255,255,.06)}
+.ar{font-size:10px;letter-spacing:3px;text-transform:uppercase;margin-bottom:9px}
+.ar.s{color:var(--green)}.ar.e{color:var(--red)}
+.srch-wrap{position:relative}
+.srch-inp{width:100%;background:var(--surf2);border:1.5px solid rgba(255,255,255,.08);border-radius:12px;padding:13px 15px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;outline:none;transition:border-color .2s}
+.srch-inp:focus{border-color:var(--gold)}
+.sug-list{position:absolute;top:calc(100% + 6px);left:0;right:0;background:#2a2a2a;border-radius:12px;overflow:hidden;z-index:100;box-shadow:0 8px 30px rgba(0,0,0,.5);max-height:220px;overflow-y:auto}
+.sug-item{display:flex;align-items:center;gap:11px;padding:11px 13px;cursor:pointer;transition:background .15s;border-bottom:1px solid rgba(255,255,255,.04)}
+.sug-item:last-child{border-bottom:none}
+.sug-item:active,.sug-item:hover{background:rgba(255,255,255,.07)}
+.sug-ph{width:36px;height:36px;border-radius:50%;object-fit:cover;background:var(--surf);flex-shrink:0}
+.sug-nm{font-size:14px;font-weight:500}
+.sug-kn{font-size:12px;color:var(--muted)}
+.sel-actor{display:flex;align-items:center;gap:12px;background:var(--surf2);border-radius:12px;padding:10px 13px;border:1.5px solid rgba(255,255,255,.1)}
+.sel-ph{width:44px;height:44px;border-radius:50%;object-fit:cover;background:var(--conn);flex-shrink:0}
+.sel-nm{font-size:15px;font-weight:600}
+.sel-kn{font-size:12px;color:var(--muted)}
+.chg-btn{margin-left:auto;background:none;border:1px solid rgba(255,255,255,.15);color:var(--muted);border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0}
+#game{background:var(--dark);padding:0}
+.game-hdr{padding:11px 13px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.05);background:var(--dark);position:sticky;top:0;z-index:10;gap:7px}
+.g-title{font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:3px;color:var(--gold)}
+.mpill{font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;white-space:nowrap}
+.mpill.movie{background:rgba(37,99,235,.2);color:#60A5FA;border:1px solid rgba(37,99,235,.3)}
+.mpill.tv{background:rgba(124,58,237,.2);color:#A78BFA;border:1px solid rgba(124,58,237,.3)}
+.dpill{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;white-space:nowrap}
+.dpill.easy{background:rgba(6,214,160,.15);color:var(--easy-c);border:1px solid rgba(6,214,160,.25)}
+.dpill.med{background:rgba(255,209,102,.15);color:var(--med-c);border:1px solid rgba(255,209,102,.25)}
+.dpill.hard{background:rgba(239,35,60,.15);color:var(--hard-c);border:1px solid rgba(239,35,60,.25)}
+.timer-disp{font-family:'Bebas Neue',sans-serif;font-size:21px;letter-spacing:2px;color:var(--green);min-width:46px;text-align:right;transition:color .3s}
+.timer-disp.warn{color:var(--gold)}
+.timer-disp.dngr{color:var(--red);animation:tpulse .5s ease infinite}
+@keyframes tpulse{0%,100%{opacity:1}50%{opacity:.5}}
+.steps-badge{font-size:11px;color:var(--muted);background:var(--surf);padding:3px 9px;border-radius:20px;white-space:nowrap}
+.chain-scroll{flex:1;overflow-y:auto;padding:14px 14px 60px}
+/* Actor slot */
+.actor-slot{background:var(--surf);border-radius:16px;border:1.5px solid rgba(255,255,255,.06);overflow:visible;position:relative;transition:border-color .3s,box-shadow .3s}
+.actor-slot.is-start{border-color:rgba(6,214,160,.4)}
+.actor-slot.is-end{border-color:rgba(239,35,60,.4)}
+.actor-slot.is-active{border-color:var(--gold);box-shadow:0 0 22px rgba(255,209,102,.12)}
+.actor-slot.is-done{border-color:rgba(6,214,160,.3)}
+.actor-slot.is-wrong{border-color:var(--red);animation:shake .4s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.af-badge{position:absolute;top:-1px;left:10px;font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:2px 8px;border-radius:0 0 6px 6px;font-weight:700;z-index:2}
+.af-badge.start{background:var(--green);color:var(--dark)}
+.af-badge.end{background:var(--red);color:#fff}
+.af-badge.mid{background:var(--surf2);color:var(--muted)}
+.actor-filled{display:flex;align-items:center;gap:11px;padding:12px 13px;padding-top:18px}
+.af-av{width:46px;height:46px;border-radius:50%;object-fit:cover;background:var(--surf2);flex-shrink:0}
+.af-info{flex:1;min-width:0}
+.af-nm{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.af-sub{font-size:12px;color:var(--muted);margin-top:1px}
+.af-tick{font-size:18px;flex-shrink:0}
+/* Search inside slot */
+.actor-search{padding:18px 12px 12px}
+.slot-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.inline-srch-wrap{position:relative}
+.inline-inp{width:100%;background:var(--surf2);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;padding:12px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;outline:none;transition:border-color .2s}
+.inline-inp:focus{border-color:var(--gold)}
+.inline-sug{position:absolute;top:calc(100% + 6px);left:0;right:0;background:#2a2a2a;border-radius:12px;overflow:hidden;z-index:50;box-shadow:0 8px 30px rgba(0,0,0,.7);max-height:220px;overflow-y:auto}
+/* Connector */
+.connector{display:flex;flex-direction:column;align-items:center}
+.conn-line{width:2px;height:10px;background:var(--conn)}
+.conn-pill{border-radius:10px;padding:5px 14px;font-size:12px;max-width:88%;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:1px solid rgba(255,255,255,.06);background:var(--surf2);color:var(--muted)}
+.conn-pill.filled-movie{color:var(--text);border-color:rgba(255,209,102,.25);background:rgba(255,209,102,.05)}
+.conn-pill.filled-tv{color:var(--text);border-color:rgba(124,58,237,.3);background:rgba(124,58,237,.06)}
+/* Title block */
+.title-block{padding:2px 14px 4px}
+.title-hint{font-size:11px;color:var(--muted);margin-bottom:6px;line-height:1.4}
+.title-srch-wrap{position:relative}
+.title-inp{width:100%;background:var(--surf2);border:1.5px solid rgba(255,209,102,.3);border-radius:12px;padding:12px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s}
+.title-inp:focus{border-color:var(--green)}
+.title-sug{position:absolute;top:calc(100% + 6px);left:0;right:0;background:#2a2a2a;border-radius:12px;overflow:hidden;z-index:50;box-shadow:0 8px 30px rgba(0,0,0,.7);max-height:220px;overflow-y:auto}
+/* Inline feedback */
+.inline-fb{margin-top:8px;border-radius:10px;padding:8px 12px;font-size:12px;font-weight:500;line-height:1.4;display:none}
+.inline-fb.bad{background:rgba(239,35,60,.12);color:#ff8095;border:1px solid rgba(239,35,60,.25);display:block}
+.inline-fb.ok{background:rgba(6,214,160,.12);color:var(--easy-c);border:1px solid rgba(6,214,160,.25);display:block}
+.inline-fb.info{background:rgba(255,209,102,.1);color:var(--gold);border:1px solid rgba(255,209,102,.2);display:block}
+/* Win */
+#win{align-items:center;justify-content:center;padding:26px 18px 40px;gap:16px;background:var(--dark);position:relative;overflow:hidden;overflow-y:auto}
+#win::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 20%,rgba(255,209,102,.09) 0%,transparent 60%);pointer-events:none}
+.win-emoji{font-size:68px;animation:bnc .8s cubic-bezier(.34,1.56,.64,1);position:relative;z-index:1}
+@keyframes bnc{0%{transform:scale(0)}100%{transform:scale(1)}}
+.win-title{font-family:'Bebas Neue',sans-serif;font-size:50px;letter-spacing:5px;color:var(--gold);text-align:center;text-shadow:0 0 40px rgba(255,209,102,.35);position:relative;z-index:1}
+.win-stats{display:flex;gap:9px;position:relative;z-index:1;flex-wrap:wrap;justify-content:center}
+.w-stat{background:var(--surf);border-radius:13px;padding:11px 14px;text-align:center;border:1px solid rgba(255,255,255,.06);min-width:76px}
+.w-sv{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--gold);letter-spacing:2px}
+.w-sl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:2px}
+.win-chain{background:var(--surf);border-radius:16px;padding:16px;width:100%;max-width:390px;border:1px solid rgba(255,255,255,.06);position:relative;z-index:1}
+.wc-title{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.wc-step{display:flex;align-items:center;gap:9px;margin-bottom:4px;font-size:14px;font-weight:500}
+.wc-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.wc-ttl{font-size:11px;color:var(--muted);margin-left:17px;margin-bottom:6px}
+/* Timeout */
+#timeout{align-items:center;justify-content:center;padding:30px 18px;gap:16px;background:var(--dark);position:relative;overflow:hidden}
+#timeout::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 30%,rgba(239,35,60,.14) 0%,transparent 60%);pointer-events:none}
+.to-emoji{font-size:68px;animation:bnc .8s cubic-bezier(.34,1.56,.64,1);position:relative;z-index:1}
+.to-title{font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:4px;color:var(--red);text-align:center;position:relative;z-index:1}
+.to-sub{color:var(--muted);text-align:center;font-size:13px;position:relative;z-index:1;max-width:290px;line-height:1.5}
+.retry-btn{width:100%;max-width:360px;padding:14px;background:var(--red);color:#fff;border:none;border-radius:14px;font-family:'Bebas Neue',sans-serif;font-size:21px;letter-spacing:3px;cursor:pointer;box-shadow:0 6px 20px rgba(239,35,60,.3);transition:all .2s;position:relative;z-index:1}
+.retry-btn:active{transform:scale(.97)}
+.home-btn2{width:100%;max-width:360px;padding:12px;background:var(--surf);color:var(--muted);border:1px solid rgba(255,255,255,.08);border-radius:14px;font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:3px;cursor:pointer;transition:all .2s;position:relative;z-index:1}
+/* Modal */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .3s}
+.modal-ov.open{opacity:1;pointer-events:all}
+.modal-sh{background:var(--surf);border-radius:24px 24px 0 0;padding:24px 20px calc(24px + env(safe-area-inset-bottom,0px));width:100%;transform:translateY(100%);transition:transform .35s cubic-bezier(.34,1.56,.64,1);max-height:90dvh;overflow-y:auto}
+.modal-ov.open .modal-sh{transform:translateY(0)}
+.modal-hnd{width:36px;height:4px;background:rgba(255,255,255,.2);border-radius:2px;margin:0 auto 18px}
+.modal-ttl{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;color:var(--gold);margin-bottom:16px}
+.hw-step{display:flex;gap:12px;margin-bottom:13px;align-items:flex-start}
+.hw-num{width:25px;height:25px;border-radius:7px;background:var(--red);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:15px;flex-shrink:0;margin-top:1px}
+.hw-txt{font-size:13px;line-height:1.6;color:var(--text)}
+.hw-txt strong{color:var(--gold)}
+.diff-legend{display:flex;flex-direction:column;gap:7px;margin:10px 0 4px;background:var(--surf2);border-radius:12px;padding:12px 14px}
+.dl-row{display:flex;align-items:flex-start;gap:10px;font-size:13px}
+.dl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px}
+</style>
+</head>
+<body>
+<!-- HOME -->
+<div class="screen active" id="home">
+  <div class="logo-wrap">
+    <div class="logo-icon">⭐</div>
+    <div class="logo-title">STAR CHAIN</div>
+    <div class="logo-sub">Connect the stars</div>
+  </div>
+  <div class="home-card">
+    <div class="sec-lbl">Media Type</div>
+    <div class="two-toggle">
+      <button class="ttbtn am" id="btnMovie" onclick="setMedia('movie')"><span>🎬</span> Movies</button>
+      <button class="ttbtn" id="btnTV" onclick="setMedia('tv')"><span>📺</span> TV Shows</button>
+    </div>
+    <div class="sec-lbl">Difficulty</div>
+    <div class="diff-grid">
+      <div class="diff-card sel-easy" id="dcEasy" onclick="setDiff('easy')">
+        <div class="diff-icon">🟢</div>
+        <div class="diff-info"><div class="diff-name easy">Easy</div><div class="diff-desc">Search actor &amp; title — wrong answers show exactly what failed</div></div>
+        <div class="diff-check">✓</div>
+      </div>
+      <div class="diff-card" id="dcMed" onclick="setDiff('med')">
+        <div class="diff-icon">🟡</div>
+        <div class="diff-info"><div class="diff-name med">Medium</div><div class="diff-desc">Search actor &amp; title — wrong answers show which part failed</div></div>
+        <div class="diff-check"></div>
+      </div>
+      <div class="diff-card" id="dcHard" onclick="setDiff('hard')">
+        <div class="diff-icon">🔴</div>
+        <div class="diff-info"><div class="diff-name hard">Hard</div><div class="diff-desc">Search actor &amp; title — only told right or wrong, no hints</div></div>
+        <div class="diff-check"></div>
+      </div>
+    </div>
+    <div class="sec-lbl">Chain Length</div>
+    <div class="slider-row">
+      <div class="slider-val" id="slVal">5 <span style="font-size:12px;color:var(--muted);letter-spacing:1px">STEPS</span></div>
+      <div class="slider-sub" id="slSub">3 actors to find</div>
+    </div>
+    <input type="range" id="chainSl" min="3" max="8" value="5" oninput="updSlider(this.value)">
+    <div class="slider-ticks"><span class="slider-tick">3</span><span class="slider-tick">4</span><span class="slider-tick">5</span><span class="slider-tick">6</span><span class="slider-tick">7</span><span class="slider-tick">8</span></div>
+    <div class="opt-row">
+      <div><div class="opt-lbl">⏱ Timer</div><div class="opt-sub" id="timerSub">90 sec per step</div></div>
+      <button class="toggle-sw" id="timerTgl" onclick="togTimer()"></button>
+    </div>
+    <button class="gold-btn" onclick="goSetup()">▶ PLAY NOW</button>
+  </div>
+  <div class="how-link" onclick="openHow()">How to play?</div>
+</div>
+<!-- API SETUP -->
+<div class="screen" id="apisetup">
+  <div class="screen-hdr"><button class="back-btn" onclick="goScreen('home')">←</button><span class="screen-title">SETUP</span></div>
+  <div class="scr-body">
+    <div class="api-warn">⚡ This app uses the free <strong>TMDB API</strong>. You need a free API key to play.</div>
+    <div class="inp-wrap"><label>TMDB API Key (free at themoviedb.org)</label><input class="txt-inp" id="apiKeyInp" type="text" placeholder="Paste your TMDB API key here…"></div>
+    <button class="red-btn" onclick="saveKey()">SAVE &amp; CONTINUE</button>
+    <div style="margin-top:15px;font-size:12px;color:var(--muted);line-height:1.9">1. Go to <strong style="color:var(--text)">themoviedb.org</strong><br>2. Create a free account<br>3. Settings → API → Request an API Key<br>4. Copy your v3 API Key</div>
+  </div>
+</div>
+<!-- ACTOR SETUP -->
+<div class="screen" id="setup">
+  <div class="screen-hdr"><button class="back-btn" onclick="goScreen('home')">←</button><span class="screen-title" id="setupTitle">CHOOSE STARS</span></div>
+  <div class="scr-body">
+    <div class="as-card">
+      <div class="ar s">⬤ Starting Star</div>
+      <div class="srch-wrap" id="startWrap">
+        <input class="srch-inp" id="startInp" placeholder="Search actor or actress…" oninput="srchSetup('start',this.value)" autocomplete="off">
+        <div class="sug-list" id="startSug"></div>
+      </div>
+    </div>
+    <div class="as-card">
+      <div class="ar e">⬤ Ending Star</div>
+      <div class="srch-wrap" id="endWrap">
+        <input class="srch-inp" id="endInp" placeholder="Search actor or actress…" oninput="srchSetup('end',this.value)" autocomplete="off">
+        <div class="sug-list" id="endSug"></div>
+      </div>
+    </div>
+    <div class="err-msg" id="setupErr"></div>
+    <button class="gold-btn dim" id="playBtn" onclick="startGame()">LET'S PLAY</button>
+  </div>
+</div>
+<!-- GAME -->
+<div class="screen" id="game">
+  <div class="game-hdr">
+    <button class="back-btn" onclick="confirmQuit()">←</button>
+    <span class="g-title">STAR CHAIN</span>
+    <span class="mpill movie" id="mPill">🎬 MOVIE</span>
+    <span class="dpill easy" id="dPill">EASY</span>
+    <span class="timer-disp" id="timerDisp" style="display:none">1:30</span>
+    <span class="steps-badge" id="stepsBadge">0/0</span>
+  </div>
+  <div class="chain-scroll" id="chainScroll"></div>
+</div>
+<!-- WIN -->
+<div class="screen" id="win">
+  <div class="win-emoji">🏆</div>
+  <div class="win-title">CHAIN COMPLETE!</div>
+  <div class="win-stats" id="winStats"></div>
+  <div class="win-chain" id="winChain"></div>
+  <button class="gold-btn" style="max-width:390px;position:relative;z-index:1" onclick="goScreen('home')">PLAY AGAIN</button>
+</div>
+<!-- TIMEOUT -->
+<div class="screen" id="timeout">
+  <div class="to-emoji">⏰</div>
+  <div class="to-title">TIME'S UP!</div>
+  <div class="to-sub" id="toSub">You ran out of time.</div>
+  <button class="retry-btn" onclick="retryGame()">TRY AGAIN</button>
+  <button class="home-btn2" onclick="goScreen('home')">HOME</button>
+</div>
+<!-- HOW TO PLAY -->
+<div class="modal-ov" id="howModal">
+  <div class="modal-sh">
+    <div class="modal-hnd"></div>
+    <div class="modal-ttl">HOW TO PLAY</div>
+    <div class="hw-step"><div class="hw-num">1</div><div class="hw-txt">Choose <strong>Movies</strong> or <strong>TV Shows</strong> — all connections must stay in that category.</div></div>
+    <div class="hw-step"><div class="hw-num">2</div><div class="hw-txt">Search boxes appear <strong>inline in the chain</strong>. First search the actor, then search the connecting movie/show below them.</div></div>
+    <div class="hw-step"><div class="hw-num">3</div><div class="hw-txt"><em>Example:</em> Leonardo DiCaprio → <strong>Wolf of Wall Street</strong> → Jonah Hill → <strong>21 Jump Street</strong> → Channing Tatum</div></div>
+    <div class="hw-step"><div class="hw-num">4</div><div class="hw-txt">Pick a <strong>difficulty</strong>:</div></div>
+    <div class="diff-legend">
+      <div class="dl-row"><div class="dl-dot" style="background:var(--easy-c)"></div><div><strong style="color:var(--easy-c)">Easy</strong> — Wrong answers tell you exactly what failed.</div></div>
+      <div class="dl-row"><div class="dl-dot" style="background:var(--med-c)"></div><div><strong style="color:var(--med-c)">Medium</strong> — Wrong answers say which part was wrong.</div></div>
+      <div class="dl-row"><div class="dl-dot" style="background:var(--hard-c)"></div><div><strong style="color:var(--hard-c)">Hard</strong> — Wrong answers only say "Incorrect" — no hints!</div></div>
+    </div>
+    <div class="hw-step"><div class="hw-num">5</div><div class="hw-txt"><strong>No repeats</strong> — the same actor or title can't appear twice in the chain.</div></div>
+  </div>
+</div>
+<script>
+const G={apiKey:localStorage.getItem('tmdb_key')||'',media:'movie',diff:'easy',chainLen:5,timerOn:false,timerIv:null,timerSec:90,startActor:null,endActor:null,chain:[],usedActors:new Set(),usedTitles:new Set(),step:0,phase:'actor',pendingActor:null,pendingTitles:[],srchTmr:{},gameTs:0,wrongCount:0};
+const IMG=(p,s='w92')=>p?`https://image.tmdb.org/t/p/${s}${p}`:null;
+const fmt=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+const esc=s=>(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+
+async function tmdb(ep,p={}){const u=new URL(`https://api.themoviedb.org/3${ep}`);u.searchParams.set(‘api_key’,G.apiKey);for(const[k,v]of Object.entries(p))u.searchParams.set(k,v);const r=await fetch(u);if(!r.ok)throw new Error(`TMDB ${r.status}`);return r.json();}
+async function findActors(q){if(!q||q.length<2)return[];const d=await tmdb(’/search/person’,{query:q,include_adult:false});return(d.results||[]).slice(0,7);}
+async function getCredits(id){const d=await tmdb(`/person/${id}/combined_credits`);return(d.cast||[]).filter(c=>c.media_type===G.media&&c.vote_count>5);}
+async function sharedTitles(id1,id2){const[c1,c2]=await Promise.all([getCredits(id1),getCredits(id2)]);const m=new Map(c1.map(x=>[x.id,x]));return c2.filter(x=>m.has(x.id)&&!G.usedTitles.has(x.id)).map(x=>({…x,title:x.title||x.name})).sort((a,b)=>(b.vote_count||0)-(a.vote_count||0));}
+async function searchTitles(q){if(!q||q.length<2)return[];const ep=G.media===‘movie’?’/search/movie’:’/search/tv’;const d=await tmdb(ep,{query:q,include_adult:false});return(d.results||[]).filter(t=>t.vote_count>5&&!G.usedTitles.has(t.id)).slice(0,7).map(t=>({…t,title:t.title||t.name}));}
+
+function setMedia(m){G.media=m;document.getElementById(‘btnMovie’).className=‘ttbtn’+(m===‘movie’?’ am’:’’);document.getElementById(‘btnTV’).className=‘ttbtn’+(m===‘tv’?’ at’:’’);}
+function setDiff(d){G.diff=d;[‘easy’,‘med’,‘hard’].forEach(x=>{const el=document.getElementById(‘dc’+x[0].toUpperCase()+x.slice(1));el.className=‘diff-card’+(x===d?` sel-${x}`:’’);el.querySelector(’.diff-check’).textContent=x===d?‘✓’:’’;}); }
+function updSlider(v){G.chainLen=parseInt(v);const mid=G.chainLen-2;document.getElementById(‘slVal’).innerHTML=`${v} <span style="font-size:12px;color:var(--muted);letter-spacing:1px">STEPS</span>`;document.getElementById(‘slSub’).textContent=`${mid} actor${mid===1?'':'s'} to find`;}
+function togTimer(){G.timerOn=!G.timerOn;document.getElementById(‘timerTgl’).classList.toggle(‘on’,G.timerOn);document.getElementById(‘timerSub’).textContent=G.timerOn?‘90 sec per step — ON’:‘90 sec per step’;}
+
+function goScreen(id){document.querySelectorAll(’.screen’).forEach(s=>s.classList.remove(‘active’));document.getElementById(id).classList.add(‘active’);window.scrollTo(0,0);}
+function goSetup(){if(!G.apiKey){goScreen(‘apisetup’);return;}resetSetup();document.getElementById(‘setupTitle’).textContent=G.media===‘tv’?‘CHOOSE TV STARS’:‘CHOOSE MOVIE STARS’;goScreen(‘setup’);}
+function saveKey(){const k=document.getElementById(‘apiKeyInp’).value.trim();if(!k)return;G.apiKey=k;localStorage.setItem(‘tmdb_key’,k);resetSetup();goScreen(‘setup’);}
+function resetSetup(){G.startActor=G.endActor=null;[‘start’,‘end’].forEach(r=>{document.getElementById(r+‘Wrap’).innerHTML=`<input class="srch-inp" id="${r}Inp" placeholder="Search actor or actress…" oninput="srchSetup('${r}',this.value)" autocomplete="off"><div class="sug-list" id="${r}Sug"></div>`;});document.getElementById(‘playBtn’).classList.add(‘dim’);document.getElementById(‘setupErr’).textContent=’’;}
+function openHow(){document.getElementById(‘howModal’).classList.add(‘open’);}
+document.getElementById(‘howModal’).addEventListener(‘click’,e=>{if(e.target.id===‘howModal’)document.getElementById(‘howModal’).classList.remove(‘open’);});
+
+async function srchSetup(role,q){clearTimeout(G.srchTmr[role]);const el=document.getElementById(role+‘Sug’);if(!q||q.length<2){el.innerHTML=’’;return;}el.innerHTML=`<div class="sug-item"><div class="loading-dots"><span></span><span></span><span></span></div></div>`;G.srchTmr[role]=setTimeout(async()=>{try{const res=await findActors(q);el.innerHTML=res.length?res.map(a=>`<div class="sug-item" onclick='selSetup("${role}",${JSON.stringify(a).replace(/'/g,"&#39;")})'>${a.profile_path?`<img class="sug-ph" src="${IMG(a.profile_path)}"/>`:`<div class="sug-ph" style="display:flex;align-items:center;justify-content:center;font-size:17px">👤</div>`}<div><div class="sug-nm">${esc(a.name)}</div><div class="sug-kn">${a.known_for_department||'Acting'}</div></div></div>`).join(’’):`<div class="sug-item" style="color:var(--muted)">No results</div>`;}catch(e){el.innerHTML=`<div class="sug-item" style="color:var(--red)">Error</div>`;}},380);}
+function selSetup(role,a){if(typeof a===‘string’)a=JSON.parse(a);G[role===‘start’?‘startActor’:‘endActor’]=a;const w=document.getElementById(role+‘Wrap’);const ph=a.profile_path?IMG(a.profile_path,‘w92’):null;w.innerHTML=`<div class="sel-actor">${ph?`<img class="sel-ph" src="${ph}"/>`:`<div class="sel-ph" style="display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--surf2)">👤</div>`}<div><div class="sel-nm">${esc(a.name)}</div><div class="sel-kn">${a.known_for_department||'Acting'}</div></div><button class="chg-btn" onclick="clearSetup('${role}')">Change</button></div>`;chkReady();}
+function clearSetup(role){G[role===‘start’?‘startActor’:‘endActor’]=null;document.getElementById(role+‘Wrap’).innerHTML=`<input class="srch-inp" id="${role}Inp" placeholder="Search actor or actress…" oninput="srchSetup('${role}',this.value)" autocomplete="off"><div class="sug-list" id="${role}Sug"></div>`;chkReady();}
+function chkReady(){const ok=G.startActor&&G.endActor&&G.startActor.id!==G.endActor.id;document.getElementById(‘playBtn’).classList.toggle(‘dim’,!ok);document.getElementById(‘setupErr’).textContent=(G.startActor&&G.endActor&&G.startActor.id===G.endActor.id)?‘Pick two different actors!’:’’;}
+
+function startGame(){killTimer();G.chain=new Array(G.chainLen).fill(null).map(()=>({actor:null,title:null}));G.usedActors=new Set([G.startActor.id,G.endActor.id]);G.usedTitles=new Set();G.step=1;G.phase=‘actor’;G.pendingActor=null;G.pendingTitles=[];G.gameTs=Date.now();G.wrongCount=0;G.chain[0].actor=G.startActor;G.chain[G.chainLen-1].actor=G.endActor;const mp=document.getElementById(‘mPill’);mp.textContent=G.media===‘movie’?‘🎬 MOVIE’:‘📺 TV’;mp.className=`mpill ${G.media}`;const dp=document.getElementById(‘dPill’);dp.textContent={easy:‘🟢 EASY’,med:‘🟡 MEDIUM’,hard:‘🔴 HARD’}[G.diff];dp.className=`dpill ${G.diff}`;goScreen(‘game’);renderChain();startStepTimer();}
+function retryGame(){startGame();}
+
+function startStepTimer(){killTimer();if(!G.timerOn)return;G.timerSec=90;document.getElementById(‘timerDisp’).style.display=‘block’;drawTimer();G.timerIv=setInterval(()=>{G.timerSec–;drawTimer();if(G.timerSec<=0){killTimer();handleTimeout();}},1000);}
+function killTimer(){clearInterval(G.timerIv);G.timerIv=null;}
+function drawTimer(){const el=document.getElementById(‘timerDisp’),s=G.timerSec;el.textContent=fmt(s);el.className=‘timer-disp’+(s<=10?’ dngr’:s<=30?’ warn’:’’);}
+function handleTimeout(){document.getElementById(‘toSub’).textContent=`You ran out of time on step ${G.step}.`;goScreen(‘timeout’);}
+
+function renderChain(){
+const N=G.chainLen,isTV=G.media===‘tv’,icon=isTV?‘📺’:‘🎬’;
+const scroll=document.getElementById(‘chainScroll’);
+let h=’’;
+for(let i=0;i<N;i++){
+const slot=G.chain[i],actor=slot?.actor;
+const isStart=i===0,isEnd=i===N-1;
+const isActorInput=(i===G.step&&G.phase===‘actor’);
+const isPendingActor=(i===G.step&&G.phase===‘title’);
+const isConfirmed=isStart||isEnd||(actor&&slot?.title&&i<G.step);
+let sc=‘actor-slot’;
+if(isStart)sc+=’ is-start’;
+else if(isEnd)sc+=’ is-end’;
+else if(isActorInput)sc+=’ is-active’;
+else if(isConfirmed||isPendingActor)sc+=’ is-done’;
+const bc=isStart?‘start’:isEnd?‘end’:‘mid’;
+const bt=isStart?‘START’:isEnd?‘END’:‘STEP ‘+i;
+if(actor){
+const ph=actor.profile_path?IMG(actor.profile_path,‘w185’):null;
+const tick=isStart?‘🟢’:isEnd?‘🎯’:isConfirmed?‘✅’:‘⏳’;
+h+=’<div class="'+sc+'" id="slot'+i+'">’
++’<span class="af-badge '+bc+'">’+bt+’</span>’
++’<div class="actor-filled">’
++(ph?’<img class="af-av" src="'+ph+'"/>’
+:’<div class="af-av" style="display:flex;align-items:center;justify-content:center;font-size:20px">👤</div>’)
++’<div class="af-info"><div class="af-nm">’+esc(actor.name)+’</div>’
++’<div class="af-sub">’+(actor.known_for_department||‘Actor’)+’</div></div>’
++’<div class="af-tick">’+tick+’</div>’
++’</div></div>’;
+} else if(isActorInput){
+const prevActor=G.chain[i-1]?.actor;
+const med=isTV?‘TV show’:‘movie’;
+const hint=(i===N-2)
+?‘Actor connecting <strong>’+esc(prevActor?.name||’’)+’</strong> → <strong>’+esc(G.endActor?.name||’’)+’</strong>’
+:‘Actor who shares a ‘+med+’ with <strong>’+esc(prevActor?.name||’’)+’</strong>’;
+h+=’<div class="'+sc+'" id="slot'+i+'">’
++’<span class="af-badge '+bc+'">’+bt+’</span>’
++’<div class="actor-search">’
++’<div class="slot-label">👤 ‘+hint+’</div>’
++’<div class="inline-srch-wrap">’
++’<input class="inline-inp" id="actorInp'+i+'" placeholder="Search actor…" oninput="srchActor('+i+',this.value)" autocomplete="off">’
++’<div class="inline-sug" id="actorSug'+i+'"></div>’
++’</div>’
++’<div class="inline-fb" id="actorFb'+i+'"></div>’
++’</div></div>’;
+} else {
+h+=’<div class="'+sc+'" id="slot'+i+'" style="opacity:.32">’
++’<span class="af-badge '+bc+'">’+bt+’</span>’
++’<div class="actor-filled">’
++’<div class="af-av" style="display:flex;align-items:center;justify-content:center;font-size:20px">🔒</div>’
++’<div class="af-info"><div class="af-nm">Locked</div><div class="af-sub">Complete previous steps</div></div>’
++’</div></div>’;
+}
+if(i<N-1){
+const confirmedTitle=slot?.title;
+const showTitleSearch=(G.phase===‘title’&&i===G.step-1&&!confirmedTitle);
+if(confirmedTitle){
+const pc=isTV?‘filled-tv’:‘filled-movie’;
+h+=’<div class="connector"><div class="conn-line"></div>’
++’<div class="conn-pill '+pc+'">’+icon+’ ‘+esc(confirmedTitle.title||confirmedTitle.name||’’)+’</div>’
++’<div class="conn-line"></div></div>’;
+} else if(showTitleSearch){
+const topActor=G.chain[i]?.actor;
+// For the last connector (i===N-2), bottom actor is the End Star
+const botActor=(i===N-2)?G.endActor:G.pendingActor;
+const med=isTV?‘TV show’:‘movie’;
+h+=’<div class="connector"><div class="conn-line"></div></div>’
++’<div class="title-block" id="titleBlock'+i+'">’
++’<div class="title-hint">’+icon+’ What ‘+med+’ connects <strong>’+esc(topActor?.name||’’)+’</strong> and <strong>’+esc(botActor?.name||’’)+’</strong>?</div>’
++’<div class="title-srch-wrap">’
++’<input class="title-inp" id="titleInp'+i+'" placeholder="Search '+med+'…" oninput="srchTitleInline('+i+',this.value)" autocomplete="off">’
++’<div class="title-sug" id="titleSug'+i+'"></div>’
++’</div>’
++’<div class="inline-fb" id="titleFb'+i+'"></div>’
++’</div>’
++’<div class="connector"><div class="conn-line"></div></div>’;
+} else {
+h+=’<div class="connector"><div class="conn-line"></div><div class="conn-pill">—</div><div class="conn-line"></div></div>’;
+}
+}
+}
+scroll.innerHTML=h;
+document.getElementById(‘stepsBadge’).textContent=Math.max(0,G.step-1)+’/’+(G.chainLen-2);
+setTimeout(function(){
+var focusId=G.phase===‘title’?‘titleBlock’+(G.step-1):‘slot’+G.step;
+var el=document.getElementById(focusId);
+if(el)el.scrollIntoView({behavior:‘smooth’,block:‘center’});
+},120);
+}
+
+async function srchActor(idx,q){
+clearTimeout(G.srchTmr[`a${idx}`]);
+const el=document.getElementById(`actorSug${idx}`);
+if(!q||q.length<2){el.innerHTML=’’;return;}
+el.innerHTML=`<div class="sug-item"><div class="loading-dots"><span></span><span></span><span></span></div></div>`;
+G.srchTmr[`a${idx}`]=setTimeout(async()=>{
+try{const res=await findActors(q);const fil=res.filter(a=>!G.usedActors.has(a.id));el.innerHTML=fil.length?fil.map(a=>`<div class="sug-item" onclick='pickActor(${idx},${JSON.stringify(a).replace(/'/g,"&#39;")})'>${a.profile_path?`<img class="sug-ph" src="${IMG(a.profile_path)}"/>`:`<div class="sug-ph" style="display:flex;align-items:center;justify-content:center;font-size:17px">👤</div>`}<div><div class="sug-nm">${esc(a.name)}</div><div class="sug-kn">${a.known_for_department||'Acting'}</div></div></div>`).join(’’):`<div class="sug-item" style="color:var(--muted)">No results</div>`;}
+catch(e){el.innerHTML=`<div class="sug-item" style="color:var(--red)">Search error</div>`;}
+},380);
+}
+
+async function pickActor(idx,a){
+if(typeof a===‘string’)a=JSON.parse(a);
+const sug=document.getElementById(`actorSug${idx}`);const inp=document.getElementById(`actorInp${idx}`);const fb=document.getElementById(`actorFb${idx}`);
+if(sug)sug.innerHTML=’’;if(inp)inp.value=a.name;
+const prev=G.chain[G.step-1]?.actor;const N=G.chainLen,med=G.media===‘tv’?‘TV show’:‘movie’;
+setFb(fb,‘info’,‘Checking…’);
+try{
+const sp=await sharedTitles(prev.id,a.id);
+if(!sp.length){G.wrongCount++;if(G.diff===‘hard’)setFb(fb,‘bad’,‘✗ Incorrect.’);else setFb(fb,‘bad’,`✗ <strong>${esc(a.name)}</strong> doesn't share a ${med} with <strong>${esc(prev.name)}</strong>.`);if(inp){inp.value=’’;inp.focus();}flashSlot(`slot${idx-1}`);return;}
+if(G.step===N-2){const se=await sharedTitles(a.id,G.endActor.id);if(!se.length){G.wrongCount++;if(G.diff===‘hard’)setFb(fb,‘bad’,‘✗ Incorrect.’);else setFb(fb,‘bad’,`✗ <strong>${esc(a.name)}</strong> can't connect to <strong>${esc(G.endActor.name)}</strong> via a ${med}.`);if(inp){inp.value=’’;inp.focus();}return;}G.pendingActor=a;G.pendingTitles=sp;a._endTitles=se;}
+else{G.pendingActor=a;G.pendingTitles=sp;}
+G.chain[G.step].actor=a;G.phase=‘title’;renderChain();
+setTimeout(()=>{const ti=document.getElementById(`titleInp${G.step-1}`);if(ti)ti.focus();},150);
+}catch(e){setFb(fb,‘bad’,‘Something went wrong.’);}
+}
+
+async function srchTitleInline(connIdx,q){
+clearTimeout(G.srchTmr[`t${connIdx}`]);
+const el=document.getElementById(`titleSug${connIdx}`);
+if(!q||q.length<2){el.innerHTML=’’;return;}
+el.innerHTML=`<div class="sug-item"><div class="loading-dots"><span></span><span></span><span></span></div></div>`;
+G.srchTmr[`t${connIdx}`]=setTimeout(async()=>{
+try{
+const res=await searchTitles(q);const valid=res.filter(t=>G.pendingTitles.some(pt=>pt.id===t.id));const icon=G.media===‘tv’?‘📺’:‘🎬’;
+if(!valid.length){el.innerHTML=res.length?res.map(t=>`<div class="sug-item" style="opacity:.4"><div class="sug-ph" style="display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--surf2)">${icon}</div><div><div class="sug-nm">${esc(t.title)}</div><div class="sug-kn">${t.release_date?.slice(0,4)||t.first_air_date?.slice(0,4)||''} — not a match</div></div></div>`).join(’’):`<div class="sug-item" style="color:var(--muted)">No results</div>`;}
+else{el.innerHTML=valid.map(t=>{const yr=t.release_date?.slice(0,4)||t.first_air_date?.slice(0,4)||’’;return`<div class="sug-item" onclick='pickTitle(${connIdx},${JSON.stringify(t).replace(/'/g,"&#39;")})'><div class="sug-ph" style="display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--surf2)">${icon}</div><div><div class="sug-nm">${esc(t.title)}</div><div class="sug-kn">${yr}</div></div></div>`;}).join(’’);}
+}catch(e){el.innerHTML=`<div class="sug-item" style="color:var(--red)">Search error</div>`;}
+},380);
+}
+
+async function pickTitle(connIdx,t){
+if(typeof t===‘string’)t=JSON.parse(t);
+const fb=document.getElementById(`titleFb${connIdx}`);
+const match=G.pendingTitles.find(pt=>pt.id===t.id);
+if(!match){
+G.wrongCount++;
+const med=G.media===‘tv’?‘TV show’:‘movie’;
+// For the end connector, describe the two actors correctly
+const topActor=G.chain[connIdx]?.actor;
+const botActor=connIdx===G.chainLen-2?G.endActor:G.pendingActor;
+if(G.diff===‘hard’)setFb(fb,‘bad’,‘✗ Incorrect title.’);
+else setFb(fb,‘bad’,`✗ <strong>${esc(t.title)}</strong> doesn't connect <strong>${esc(topActor?.name||'')}</strong> and <strong>${esc(botActor?.name||'')}</strong> — try another ${med}!`);
+const inp=document.getElementById(`titleInp${connIdx}`);
+if(inp){inp.value=’’;inp.focus();}
+return;
+}
+// If this is the final connector (lastMiddle → End), use commitEndTitle
+if(connIdx===G.chainLen-2) await commitEndTitle(match);
+else await commitStep(match);
+}
+
+async function commitStep(match){
+const N=G.chainLen,step=G.step,actor=G.pendingActor;
+if(step===N-2){
+// Commit the title connecting prev→lastMiddle, place the actor,
+// then ask the player to also type the title connecting lastMiddle→End
+G.chain[step-1].title=match;
+G.chain[step].actor=actor;
+G.usedActors.add(actor.id);
+G.usedTitles.add(match.id);
+// Now need title between slot step and slot N-1 (the end)
+// Re-use pendingTitles = shared titles between lastMiddle and end
+G.pendingTitles=actor._endTitles||await sharedTitles(actor.id,G.endActor.id);
+G.pendingActor=actor; // still needed for title validation
+G.step=N-1; // connector index for title search is step (=N-2), between slot N-2 and N-1
+G.phase=‘title’;
+renderChain();
+setTimeout(()=>{const ti=document.getElementById(‘titleInp’+(N-2));if(ti)ti.focus();},150);
+} else {
+G.chain[step-1].title=match;G.chain[step].actor=actor;G.usedActors.add(actor.id);G.usedTitles.add(match.id);G.step++;G.phase=‘actor’;G.pendingActor=null;G.pendingTitles=[];renderChain();startStepTimer();setTimeout(()=>{const el=document.getElementById(`actorInp${G.step}`);if(el)el.focus();},150);
+}
+}
+
+async function commitEndTitle(match){
+// Called when the player picks the final title (lastMiddle → End)
+const N=G.chainLen;
+G.chain[N-2].title=match;
+G.usedTitles.add(match.id);
+G.step=N; G.phase=‘actor’;
+G.pendingActor=null; G.pendingTitles=[];
+killTimer(); renderChain();
+setTimeout(showWin,600);
+}
+
+function setFb(el,type,html){if(!el)return;el.className=`inline-fb ${type}`;el.innerHTML=html;}
+function flashSlot(id){const el=document.getElementById(id);if(!el)return;el.classList.add(‘is-wrong’);setTimeout(()=>el.classList.remove(‘is-wrong’),500);}
+
+function showWin(){
+const N=G.chainLen,moves=N-2,isTV=G.media===‘tv’,icon=isTV?‘📺’:‘🎬’;
+const elapsed=Math.round((Date.now()-G.gameTs)/1000);
+const diffLabel={easy:‘🟢 Easy’,med:‘🟡 Medium’,hard:‘🔴 Hard’}[G.diff];
+document.getElementById(‘winStats’).innerHTML=`<div class="w-stat"><div class="w-sv">${moves}</div><div class="w-sl">Move${moves===1?'':'s'}</div></div><div class="w-stat"><div class="w-sv">${icon}</div><div class="w-sl">${isTV?'TV':'Movie'}</div></div><div class="w-stat"><div class="w-sv">${fmt(elapsed)}</div><div class="w-sl">Time</div></div><div class="w-stat"><div class="w-sv">${G.wrongCount}</div><div class="w-sl">Wrong</div></div>`;
+let ch=’’;
+for(let i=0;i<N;i++){const slot=G.chain[i],actor=slot.actor;const dc=i===0?‘var(–green)’:i===N-1?‘var(–red)’:‘var(–gold)’;ch+=`<div class="wc-step"><div class="wc-dot" style="background:${dc}"></div><strong>${esc(actor.name)}</strong></div>`;if(slot.title)ch+=`<div class="wc-ttl">${icon} ${esc(slot.title.title||slot.title.name||'')}</div>`;}
+document.getElementById(‘winChain’).innerHTML=`<div class="wc-title">Your Chain • ${diffLabel}</div>${ch}`;
+goScreen(‘win’);
+}
+
+function confirmQuit(){killTimer();if(confirm(‘Quit this game?’))goScreen(‘home’);else startStepTimer();}
+updSlider(5);
+</script>
+
+</body>
+</html>
