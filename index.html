@@ -198,6 +198,7 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
 .submit-bar{position:sticky;bottom:0;left:0;right:0;padding:12px 14px calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(to bottom,transparent,var(--dark) 28%);z-index:20;pointer-events:none}
 .submit-bar-inner{pointer-events:all}
 .submit-chain-btn{width:100%;min-height:54px;padding:14px;border:none;border-radius:16px;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;cursor:pointer;transition:transform .15s,box-shadow .2s;-webkit-appearance:none;display:flex;align-items:center;justify-content:center;gap:8px}
+.submit-chain-btn.easy{background:linear-gradient(135deg,var(--easy-c),#5DF5C8);color:#052e1f;box-shadow:0 6px 24px rgba(45,212,160,.35)}
 .submit-chain-btn.med{background:linear-gradient(135deg,var(--med-c),#FFD166);color:#1a0e00;box-shadow:0 6px 24px rgba(245,166,35,.35)}
 .submit-chain-btn.hard{background:linear-gradient(135deg,var(--hard-c),#FF6B7A);color:#fff;box-shadow:0 6px 24px rgba(232,52,74,.35)}
 .submit-chain-btn:active{transform:scale(.97)}
@@ -589,17 +590,28 @@ function renderChain(){
     }
   }
 
-  if(mh){
-    const allA=Array.from({length:N-2},(_,k)=>k+1).every(k=>!!G.mhActors[k]);
-    const allT=Array.from({length:N-1},(_,k)=>k).every(k=>!!G.mhTitles[k]);
-    const cls=G.diff==='hard'?'hard':'med';
-    h+='<div class="submit-bar"><div class="submit-bar-inner"><button class="submit-chain-btn '+cls+((allA&&allT)?'':' dim')+'" onclick="submitChain()">'+(G.diff==='hard'?'🔴':'🟡')+' SUBMIT CHAIN</button></div></div>';
+  // Submit bar — all difficulties
+  {
+    let ready=false,cls='',icon='',fn='';
+    if(G.diff==='easy'){
+      // Ready when the whole chain is filled (step===N, i.e. commitEndTitle has been called)
+      ready=G.step>=N&&G.chain.slice(0,N-1).every(s=>s.title);
+      cls='easy';icon='🟢';fn='submitEasy()';
+    } else {
+      const allA=Array.from({length:N-2},(_,k)=>k+1).every(k=>!!G.mhActors[k]);
+      const allT=Array.from({length:N-1},(_,k)=>k).every(k=>!!G.mhTitles[k]);
+      ready=allA&&allT;
+      cls=G.diff==='hard'?'hard':'med';
+      icon=G.diff==='hard'?'🔴':'🟡';
+      fn='submitChain()';
+    }
+    h+='<div class="submit-bar"><div class="submit-bar-inner"><button class="submit-chain-btn '+cls+(ready?'':' dim')+'" onclick="'+fn+'">'+icon+' SUBMIT CHAIN</button></div></div>';
   }
 
   scroll.innerHTML=h;
-  if(!mh)document.getElementById('stepsBadge').textContent=Math.max(0,G.step-1)+'/'+(G.chainLen-2);
-  else document.getElementById('stepsBadge').textContent=Object.keys(G.mhActors).length+'/'+(G.chainLen-2);
-  if(!mh)setTimeout(()=>{const focusId=G.phase==='title'?'titleBlock'+(G.step-1):'slot'+G.step;const el=document.getElementById(focusId);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},120);
+  if(!mh)document.getElementById('stepsBadge').textContent=(G.phase==='done'?(N-2)+'/'+(N-2):Math.max(0,G.step-1)+'/'+(N-2));
+  else document.getElementById('stepsBadge').textContent=Object.keys(G.mhActors).length+'/'+(N-2);
+  if(!mh&&G.phase!=='done')setTimeout(()=>{const focusId=G.phase==='title'?'titleBlock'+(G.step-1):'slot'+G.step;const el=document.getElementById(focusId);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},120);
 }
 
 // MED/HARD
@@ -625,7 +637,8 @@ async function pickActor(idx,a){if(typeof a==='string')a=JSON.parse(a);const sug
 async function srchTitleInline(connIdx,q){clearTimeout(G.srchTmr[`t${connIdx}`]);const el=document.getElementById(`titleSug${connIdx}`);if(!q||q.length<2){el.innerHTML='';return;}el.innerHTML=`<div class="sug-item"><div class="loading-dots"><span></span><span></span><span></span></div></div>`;G.srchTmr[`t${connIdx}`]=setTimeout(async()=>{try{const res=await searchTitles(q);const valid=res.filter(t=>G.pendingTitles.some(pt=>pt.id===t.id));const icon=G.media==='tv'?'📺':'🎬';if(!valid.length){el.innerHTML=res.length?res.map(t=>`<div class="sug-item" style="opacity:.4"><div class="sug-ph" style="display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--surf2)">${icon}</div><div><div class="sug-nm">${esc(t.title)}</div><div class="sug-kn">${t.release_date?.slice(0,4)||t.first_air_date?.slice(0,4)||''} — not a match</div></div></div>`).join(''):`<div class="sug-item" style="color:var(--muted)">No results</div>`;}else{el.innerHTML=valid.map(t=>{const yr=t.release_date?.slice(0,4)||t.first_air_date?.slice(0,4)||'';return`<div class="sug-item" onclick='pickTitle(${connIdx},${JSON.stringify(t).replace(/'/g,"&#39;")})'><div class="sug-ph" style="display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--surf2)">${icon}</div><div><div class="sug-nm">${esc(t.title)}</div><div class="sug-kn">${yr}</div></div></div>`;}).join('');}}catch(e){el.innerHTML=`<div class="sug-item" style="color:var(--red)">Search error</div>`;}},380);}
 async function pickTitle(connIdx,t){if(typeof t==='string')t=JSON.parse(t);const fb=document.getElementById(`titleFb${connIdx}`);const match=G.pendingTitles.find(pt=>pt.id===t.id);if(!match){G.wrongCount++;const med=G.media==='tv'?'TV show':'movie';const topActor=G.chain[connIdx]?.actor;const botActor=connIdx===G.chainLen-2?G.endActor:G.pendingActor;setFb(fb,'bad',`✗ <strong>${esc(t.title)}</strong> doesn't connect <strong>${esc(topActor?.name||'')}</strong> and <strong>${esc(botActor?.name||'')}</strong> — try another ${med}!`);const inp=document.getElementById(`titleInp${connIdx}`);if(inp){inp.value='';inp.focus();}return;}if(connIdx===G.chainLen-2)await commitEndTitle(match);else await commitStep(match);}
 async function commitStep(match){const N=G.chainLen,step=G.step,actor=G.pendingActor;if(step===N-2){G.chain[step-1].title=match;G.chain[step].actor=actor;G.usedActors.add(actor.id);G.usedTitles.add(match.id);G.pendingTitles=(actor._endTitles||await sharedTitles(actor.id,G.endActor.id)).filter(t=>!G.usedTitles.has(t.id));G.pendingActor=actor;G.step=N-1;G.phase='title';renderChain();setTimeout(()=>{const ti=document.getElementById('titleInp'+(N-2));if(ti)ti.focus();},150);}else{G.chain[step-1].title=match;G.chain[step].actor=actor;G.usedActors.add(actor.id);G.usedTitles.add(match.id);G.step++;G.phase='actor';G.pendingActor=null;G.pendingTitles=[];renderChain();startStepTimer();setTimeout(()=>{const el=document.getElementById(`actorInp${G.step}`);if(el)el.focus();},150);}}
-async function commitEndTitle(match){const N=G.chainLen;G.chain[N-2].title=match;G.usedTitles.add(match.id);G.step=N;G.phase='actor';G.pendingActor=null;G.pendingTitles=[];killTimer();renderChain();setTimeout(showWin,600);}
+async function commitEndTitle(match){const N=G.chainLen;G.chain[N-2].title=match;G.usedTitles.add(match.id);G.step=N;G.phase='done';G.pendingActor=null;G.pendingTitles=[];renderChain();setTimeout(()=>{const el=document.querySelector('.submit-bar');if(el)el.scrollIntoView({behavior:'smooth',block:'end'});},150);}
+function submitEasy(){killTimer();setTimeout(showWin,400);}
 function setFb(el,type,html){if(!el)return;el.className=`inline-fb ${type}`;el.innerHTML=html;}
 function flashSlot(id){const el=document.getElementById(id);if(!el)return;el.classList.add('is-wrong');setTimeout(()=>el.classList.remove('is-wrong'),500);}
 
