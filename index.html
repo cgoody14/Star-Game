@@ -121,8 +121,6 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
 .how-link{min-height:44px;display:flex;align-items:center;justify-content:center;margin-top:12px;font-size:13px;color:var(--muted);cursor:pointer;text-decoration:underline;position:relative;z-index:1;background:none;border:none;width:100%;font-family:'DM Sans',sans-serif;-webkit-appearance:none}
 
 /* API SETUP */
-#apisetup{background:var(--dark)}
-.api-warn{background:rgba(232,52,74,.1);border:1px solid rgba(232,52,74,.3);border-radius:12px;padding:13px 15px;margin-bottom:18px;font-size:13px;color:#ffaaaa;line-height:1.6}
 .inp-wrap label{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:7px}
 .txt-inp{width:100%;background:var(--surf2);border:1.5px solid rgba(255,255,255,.08);border-radius:12px;padding:14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:16px;outline:none;transition:border-color .2s;margin-bottom:14px;-webkit-appearance:none}
 .txt-inp:focus{border-color:var(--gold)}
@@ -436,21 +434,7 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
   </div>
 </div>
 
-<!-- API SETUP -->
-<div class="screen" id="apisetup">
-  <div class="screen-hdr">
-    <button class="back-btn" onclick="goScreen('home')">←</button>
-    <div class="screen-title">TMDB KEY</div>
-  </div>
-  <div class="scr-scroll">
-    <div class="api-warn">Star Chain uses The Movie Database (TMDB) API. Get a free key at <strong>themoviedb.org</strong> → Settings → API.</div>
-    <div class="inp-wrap">
-      <label>Your API Key</label>
-      <input class="txt-inp" id="apiKeyInp" placeholder="Paste key here…" autocomplete="off">
-    </div>
-    <button class="gold-btn" onclick="saveKey()">SAVE & CONTINUE</button>
-  </div>
-</div>
+
 
 <!-- SETUP (custom game) -->
 <div class="screen" id="setup">
@@ -562,7 +546,6 @@ const IMG_BASE = 'https://image.tmdb.org/t/p/';
 
 // ── STATE ──────────────────────────────────────────────────────────────────
 const G = {
-  apiKey: localStorage.getItem('tmdb_key') || '',
   userToken: getUserToken(),
   diff: 'easy', chainLen: 5, timerOn: false,
   startActor: null, endActor: null,
@@ -642,8 +625,7 @@ async function getMovieStats(date) {
 
 // ── TMDB ───────────────────────────────────────────────────────────────────
 async function tmdb(ep, p={}) {
-  const u = new URL(`https://api.themoviedb.org/3${ep}`);
-  u.searchParams.set('api_key', G.apiKey);
+  const u = new URL(`https://star-chain-proxy.christiangoodwin97.workers.dev/3${ep}`);
   for (const [k,v] of Object.entries(p)) u.searchParams.set(k, v);
   const r = await fetch(u);
   if (!r.ok) throw new Error(`TMDB ${r.status}`);
@@ -674,7 +656,6 @@ async function getActorById(id) {
 
 // ── INIT ───────────────────────────────────────────────────────────────────
 async function init() {
-  G.apiKey = localStorage.getItem('tmdb_key') || '';
   setDiff('easy');
   updSlider(5);
   try {
@@ -771,7 +752,6 @@ function goFreePlay() {
 }
 
 function goDailySetup() {
-  if (!G.apiKey) { goScreen('apisetup'); return; }
   if (!G.dailyPuzzle) { alert('No puzzle today — check back tomorrow!'); return; }
   // Populate the daily setup screen
   const p = G.dailyPuzzle;
@@ -826,21 +806,13 @@ function launchDailyGame() {
 }
 
 function goSetup() {
-  if (!G.apiKey) { goScreen('apisetup'); return; }
   G.isDailyGame = false;
   resetSetup();
   document.getElementById('setupTitle').textContent = 'CHOOSE STARS';
   goScreen('setup');
 }
 
-function saveKey() {
-  const k = document.getElementById('apiKeyInp').value.trim();
-  if (!k) return;
-  G.apiKey = k;
-  localStorage.setItem('tmdb_key', k);
-  goScreen('home');
-  loadDailyBanner();
-}
+
 
 function openHow() { const m=document.getElementById('howModal'); m.style.display='none'; requestAnimationFrame(()=>{m.style.display='flex';requestAnimationFrame(()=>m.classList.add('open'));}); }
 function closeHow() { const m=document.getElementById('howModal'); m.classList.remove('open'); setTimeout(()=>{m.style.display='none';},350); }
@@ -848,7 +820,6 @@ document.getElementById('howModal').addEventListener('click', e=>{if(e.target.id
 
 // ── DAILY PUZZLE ───────────────────────────────────────────────────────────
 async function playPuzzle(dateStr) {
-  if (!G.apiKey) { goScreen('apisetup'); return; }
   // Load puzzle from DB
   let puzzle = G.dailyPuzzle && G.dailyPuzzle.puzzle_date === dateStr ? G.dailyPuzzle : await getDailyPuzzle(dateStr);
   if (!puzzle) { alert('Could not load puzzle for that date.'); return; }
