@@ -677,7 +677,15 @@ async function init() {
   G.apiKey = localStorage.getItem('tmdb_key') || '';
   setDiff('easy');
   updSlider(5);
-  await loadDailyBanner();
+  try {
+    await Promise.race([
+      loadDailyBanner(),
+      new Promise((_,rej) => setTimeout(() => rej(new Error('timeout')), 6000))
+    ]);
+  } catch(e) {
+    console.warn('Daily banner load failed or timed out:', e);
+  }
+  goScreen('home');
   document.getElementById('loadingOv').classList.add('hidden');
 }
 
