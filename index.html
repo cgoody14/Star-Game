@@ -153,7 +153,14 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
 
 /* GAME */
 #game{background:var(--dark)}
-.game-hdr{background:var(--surf);padding:12px 14px;display:flex;align-items:center;gap:8px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.06);flex-wrap:wrap}
+.game-hdr{background:var(--surf);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.06)}
+.hdr-chain-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.hdr-actors{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr-start{color:var(--easy-c);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hdr-end{color:var(--hard-c);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hdr-arrow{color:var(--muted);font-size:12px;flex-shrink:0}
+.hdr-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.daily-hard-notice{display:flex;align-items:center;gap:12px;background:rgba(232,52,74,.1);border:1px solid rgba(232,52,74,.25);border-radius:14px;padding:14px 16px;margin-bottom:18px}
 .mpill{font-size:10px;font-weight:600;padding:4px 9px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;background:rgba(37,99,235,.2);color:#93B4FF;border:1px solid rgba(37,99,235,.3)}
 .dpill{font-size:10px;font-weight:600;padding:4px 9px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;white-space:nowrap}
 .dpill.easy{background:rgba(45,212,160,.15);color:var(--easy-c);border:1px solid rgba(45,212,160,.3)}
@@ -369,23 +376,12 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
     </div>
 
     <div class="home-card">
-      <div class="sec-lbl">Choose Difficulty</div>
-      <div class="diff-grid">
-        <button class="diff-card" id="ddcEasy" onclick="setDailyDiff('easy')">
-          <span class="diff-icon">🟢</span>
-          <span class="diff-info"><span class="diff-name easy">Easy</span><span class="diff-desc">Each step validates live. Edit as you go.</span></span>
-          <span class="diff-check"></span>
-        </button>
-        <button class="diff-card" id="ddcMed" onclick="setDailyDiff('med')">
-          <span class="diff-icon">🟡</span>
-          <span class="diff-info"><span class="diff-name med">Medium</span><span class="diff-desc">Fill the whole chain, then submit.</span></span>
-          <span class="diff-check"></span>
-        </button>
-        <button class="diff-card" id="ddcHard" onclick="setDailyDiff('hard')">
-          <span class="diff-icon">🔴</span>
-          <span class="diff-info"><span class="diff-name hard">Hard</span><span class="diff-desc">Submit blind — only told correct or not.</span></span>
-          <span class="diff-check"></span>
-        </button>
+      <div class="daily-hard-notice">
+        <span class="diff-icon">🔴</span>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--hard-c);margin-bottom:2px">HARD MODE</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.4">Daily puzzles are always Hard — fill the whole chain and submit blind.</div>
+        </div>
       </div>
       <button class="gold-btn" id="dailyPlayBtn" onclick="launchDailyGame()">📅 PLAY TODAY'S PUZZLE</button>
     </div>
@@ -466,11 +462,11 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
 <!-- GAME -->
 <div class="screen" id="game">
   <div class="game-hdr">
-    <button class="back-btn" onclick="confirmQuit()" style="font-size:14px;padding:0 10px;min-width:auto">✕ QUIT</button>
-    <span class="mpill">🎬 MOVIES</span>
-    <span class="dpill" id="dPill"></span>
-    <span class="steps-badge" id="stepsBadge">0/0</span>
-    <span class="timer-disp" id="timerDisp">1:30</span>
+    <button class="back-btn" onclick="confirmQuit()" style="font-size:14px;padding:0 10px;min-width:auto">✕</button>
+    <div class="hdr-chain-info">
+      <div class="hdr-actors"><span class="hdr-start" id="hdrStart">—</span><span class="hdr-arrow">→</span><span class="hdr-end" id="hdrEnd">—</span></div>
+      <div class="hdr-meta"><span class="dpill" id="dPill"></span><span class="steps-badge" id="stepsBadge">0/0 steps</span><span class="timer-disp" id="timerDisp">1:30</span></div>
+    </div>
   </div>
   <div class="chain-scroll" id="chainScroll"></div>
 </div>
@@ -802,6 +798,7 @@ function setDailyDiff(d) {
 
 function launchDailyGame() {
   if (!G.dailyPuzzle) return;
+  G.diff = 'hard';
   playPuzzle(todayStr());
 }
 
@@ -934,6 +931,8 @@ function startGame() {
   const dp = document.getElementById('dPill');
   dp.textContent = {easy:'🟢 EASY',med:'🟡 MEDIUM',hard:'🔴 HARD'}[G.diff];
   dp.className = `dpill ${G.diff}`;
+  document.getElementById('hdrStart').textContent = G.startActor.name;
+  document.getElementById('hdrEnd').textContent = G.endActor.name;
   goScreen('game');
   renderChain();
   startStepTimer();
@@ -1128,8 +1127,9 @@ function renderChain() {
   }
 
   scroll.innerHTML = h;
-  if (!mh) document.getElementById('stepsBadge').textContent = (G.phase==='done'?(N-2)+'/'+(N-2):Math.max(0,G.step-1)+'/'+(N-2));
-  else document.getElementById('stepsBadge').textContent = Object.keys(G.mhActors).length+'/'+(N-2);
+  const mid = N-2;
+  const filled = !mh ? (G.phase==='done' ? mid : Math.max(0,G.step-1)) : Object.keys(G.mhActors).length;
+  document.getElementById('stepsBadge').textContent = `${filled} of ${mid} middle step${mid===1?'':'s'}`;
   if (!mh && G.phase!=='done') setTimeout(()=>{
     const focusId = G.phase==='title' ? 'titleBlock'+(G.step-1) : 'slot'+G.step;
     const el = document.getElementById(focusId);
