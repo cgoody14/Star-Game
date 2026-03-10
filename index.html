@@ -319,8 +319,8 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
       <div class="mc-icon">📅</div>
       <div class="mc-body">
         <div class="mc-label" id="dailyLabel">DAILY CHALLENGE</div>
-        <div class="mc-title" id="dailyTitle">TODAY'S PUZZLE</div>
-        <div class="mc-sub" id="dailySub">Loading today's stars…</div>
+        <div class="mc-title" id="dailyTitle">PUZZLE #—</div>
+        <div class="mc-sub" id="dailySub">Loading…</div>
       </div>
       <div class="mc-arrow" id="dailyArrow">▶</div>
     </button>
@@ -705,7 +705,10 @@ async function loadDailyBanner() {
       card.style.opacity = '.5';
       return;
     }
-    titleEl.textContent = `${puzzle.start_actor_name} → ${puzzle.end_actor_name}`;
+    const epoch = new Date('2026-03-10T12:00:00');
+    const today = new Date(puzzle.puzzle_date + 'T12:00:00');
+    const puzzleNum = Math.round((today - epoch) / 86400000) + 1;
+    titleEl.textContent = `PUZZLE #${puzzleNum}`;
     subEl.textContent = `${puzzle.chain_length} steps · Tap to pick difficulty`;
     // Check completed in any difficulty
     const doneEasy = localStorage.getItem(`sc_done_${todayStr()}_easy`);
@@ -717,7 +720,7 @@ async function loadDailyBanner() {
       card.classList.add('done');
       labelEl.textContent = `✓ COMPLETED ${badges}`;
       arrowEl.textContent = '✓';
-      subEl.textContent = `Tap to play again or try another difficulty`;
+      subEl.textContent = 'Completed! Tap to play again or try another difficulty';
     } else {
       card.classList.remove('done');
       labelEl.textContent = 'DAILY CHALLENGE';
@@ -773,7 +776,10 @@ function goDailySetup() {
   // Populate the daily setup screen
   const p = G.dailyPuzzle;
   const dateStr = new Date(p.puzzle_date + 'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
-  document.getElementById('dailySetupDate').textContent = dateStr.toUpperCase();
+  const epoch = new Date('2026-03-10T12:00:00');
+  const puzzleDay = new Date(p.puzzle_date + 'T12:00:00');
+  const puzzleNum = Math.round((puzzleDay - epoch) / 86400000) + 1;
+  document.getElementById('dailySetupDate').textContent = `PUZZLE #${puzzleNum} · ${dateStr.toUpperCase()}`;
   document.getElementById('dapStartNm').textContent = p.start_actor_name;
   document.getElementById('dapEndNm').textContent = p.end_actor_name;
   // Photos
