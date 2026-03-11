@@ -68,7 +68,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--text);t
 .mode-card.freeplay .mc-arrow{color:#93B4FF}
 .mode-card.past-card{background:linear-gradient(135deg,rgba(122,128,153,.12),rgba(122,128,153,.06));border-color:rgba(122,128,153,.25);box-shadow:0 8px 32px rgba(0,0,0,.15)}
 /* Free play / Daily settings screens */
-
+#freeplay{background:var(--dark);align-items:center}
+#freeplay .screen-hdr{width:100%;max-width:560px}
+#freeplay .scr-scroll{width:100%;max-width:560px}
+#dailysetup{background:var(--dark);align-items:center}
+#dailysetup .screen-hdr{width:100%;max-width:560px}
+#dailysetup .scr-scroll{width:100%;max-width:560px}
 .daily-actors-preview{background:var(--surf);border-radius:18px;padding:16px;margin-bottom:18px;border:1px solid rgba(245,166,35,.2);display:flex;align-items:center}
 .dap-actor{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1}
 .dap-ph{width:56px;height:56px;border-radius:50%;object-fit:cover;background:var(--surf3);border:2px solid rgba(255,255,255,.1)}
@@ -169,33 +174,7 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
 .hdr-step-dot.active{border-color:var(--gold);background:rgba(245,166,35,.1);animation:hdr-pulse .9s ease-in-out infinite}
 @keyframes hdr-pulse{0%,100%{box-shadow:0 0 0 0 rgba(245,166,35,.4)}50%{box-shadow:0 0 0 4px rgba(245,166,35,0)}}
 .hdr-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center}
-.setup-page{display:flex;flex-direction:column;height:100%;max-width:560px;width:100%;margin:0 auto;padding:0}
-.setup-hdr{padding:14px 16px 0;display:flex;align-items:center;gap:12px;flex-shrink:0}
-.setup-actors-row{padding:12px 16px 0;flex-shrink:0}
-.setup-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 16px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px}
-.setup-body .gold-btn{margin-top:auto}
-.setup-body .diff-grid{margin-bottom:0}
-.setup-body .sec-lbl{margin-bottom:6px}
-#dailysetup{background:var(--dark);align-items:center}
-#freeplay{background:var(--dark);align-items:center}
-@media(min-height:700px){
-  .setup-body{overflow-y:visible;flex:unset}
-  .setup-page{justify-content:center;gap:0}
-  .diff-card{min-height:52px;padding:10px 14px}
-  .how-to-play-card{padding:10px 14px}
-  .htp-step{margin-bottom:6px;font-size:12px}
-  .htp-title{margin-bottom:8px}
-  .daily-hard-notice{padding:10px 14px}
-  .setup-body{gap:8px;padding-bottom:16px}
-  .slider-wrap{padding:6px 0}
-  .slider-ticks{margin-bottom:8px}
-  .opt-row{margin-bottom:0;padding:10px 14px}
-}
-@media(min-width:600px){
-  .setup-page{max-width:600px}
-  .setup-body{overflow-y:visible}
-}
-.daily-hard-notice{display:flex;align-items:center;gap:12px;background:rgba(232,52,74,.1);border:1px solid rgba(232,52,74,.25);border-radius:14px;padding:12px 16px;margin-bottom:0}
+.daily-hard-notice{display:flex;align-items:center;gap:12px;background:rgba(232,52,74,.1);border:1px solid rgba(232,52,74,.25);border-radius:14px;padding:14px 16px;margin-bottom:14px}
 .how-to-play-card{background:var(--surf2);border-radius:14px;padding:14px 16px;margin-bottom:18px;border:1px solid rgba(255,255,255,.06)}
 .htp-title{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:12px}
 .htp-step{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;font-size:13px;color:var(--text);line-height:1.5}
@@ -310,9 +289,6 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
 .social-count{font-size:11px;color:var(--muted);text-align:center;margin-top:8px}
 
 .win-btns{width:100%;max-width:400px;display:flex;flex-direction:column;gap:10px;position:relative;z-index:1}
-.share-btn{width:100%;min-height:54px;padding:14px;background:linear-gradient(135deg,#1d9bf0,#0d84d4);color:#fff;border:none;border-radius:14px;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;cursor:pointer;transition:transform .15s,box-shadow .2s;box-shadow:0 6px 24px rgba(29,155,240,.35);-webkit-appearance:none;display:flex;align-items:center;justify-content:center;gap:8px}
-.share-btn:active{transform:scale(.97)}
-.share-btn.copied{background:linear-gradient(135deg,var(--easy-c),#5DF5C8);color:#052e1f;box-shadow:0 6px 24px rgba(45,212,160,.35)}
 .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
 .stat-card{background:var(--surf);border-radius:18px;padding:18px 14px;border:1px solid rgba(255,255,255,.07);text-align:center}
 .stat-card.gold{border-color:rgba(245,166,35,.3);background:rgba(245,166,35,.07)}
@@ -428,27 +404,26 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
 </div>
 
 <!-- DAILY SETUP — pick difficulty then launch -->
-<div class="screen" id="dailysetup">
-  <div class="setup-page">
-    <div class="setup-hdr">
-      <button class="back-btn" onclick="goScreen('home')">←</button>
-      <div class="screen-title">DAILY CHALLENGE</div>
-    </div>
-    <div class="setup-actors-row">
-      <div class="daily-date-pill" id="dailySetupDate">TODAY</div>
-      <div class="daily-actors-preview" id="dailyActorsPreview">
-        <div class="dap-actor">
-          <div class="dap-ph" id="dapStartPh" style="display:flex;align-items:center;justify-content:center;font-size:22px">👤</div>
-          <div class="dap-nm" id="dapStartNm">—</div>
-        </div>
-        <div class="dap-arrow">→</div>
-        <div class="dap-actor">
-          <div class="dap-ph" id="dapEndPh" style="display:flex;align-items:center;justify-content:center;font-size:22px">👤</div>
-          <div class="dap-nm" id="dapEndNm">—</div>
-        </div>
+<div class="screen" id="dailysetup" style="align-items:center">
+  <div class="screen-hdr" style="width:100%;max-width:560px">
+    <button class="back-btn" onclick="goScreen('home')">←</button>
+    <div class="screen-title">DAILY CHALLENGE</div>
+  </div>
+  <div class="scr-scroll">
+    <div class="daily-date-pill" id="dailySetupDate">TODAY</div>
+    <div class="daily-actors-preview" id="dailyActorsPreview">
+      <div class="dap-actor">
+        <div class="dap-ph" id="dapStartPh" style="display:flex;align-items:center;justify-content:center;font-size:22px">👤</div>
+        <div class="dap-nm" id="dapStartNm">—</div>
+      </div>
+      <div class="dap-arrow">→</div>
+      <div class="dap-actor">
+        <div class="dap-ph" id="dapEndPh" style="display:flex;align-items:center;justify-content:center;font-size:22px">👤</div>
+        <div class="dap-nm" id="dapEndNm">—</div>
       </div>
     </div>
-    <div class="setup-body">
+
+    <div class="home-card">
       <div class="daily-hard-notice">
         <span class="diff-icon">🔴</span>
         <div>
@@ -459,10 +434,10 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
       <div class="how-to-play-card">
         <div class="htp-title">📖 How To Play</div>
         <div class="htp-step"><span class="htp-num">1</span><span>You'll be given a <strong>Start Actor</strong> and an <strong>End Actor</strong>.</span></div>
-        <div class="htp-step"><span class="htp-num">2</span><span>Find middle actors who share a movie with the previous actor.</span></div>
-        <div class="htp-step"><span class="htp-num">3</span><span>Select a <strong>movie</strong> connecting each actor to the next.</span></div>
-        <div class="htp-step"><span class="htp-num">4</span><span>No repeating actors or movies.</span></div>
-        <div class="htp-step"><span class="htp-num">5</span><span>Fill the chain then hit <strong>Submit</strong>.</span></div>
+        <div class="htp-step"><span class="htp-num">2</span><span>Fill in the middle steps by finding actors who share a movie with the previous actor.</span></div>
+        <div class="htp-step"><span class="htp-num">3</span><span>Select a <strong>movie</strong> that connects each actor to the next.</span></div>
+        <div class="htp-step"><span class="htp-num">4</span><span>No repeating actors or movies allowed.</span></div>
+        <div class="htp-step"><span class="htp-num">5</span><span>Fill the entire chain, then hit <strong>Submit</strong> to see if you're right!</span></div>
       </div>
       <button class="gold-btn" id="dailyPlayBtn" onclick="launchDailyGame()">📅 PLAY TODAY'S PUZZLE</button>
     </div>
@@ -471,12 +446,12 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
 
 <!-- FREE PLAY SETTINGS -->
 <div class="screen" id="freeplay">
-  <div class="setup-page">
-    <div class="setup-hdr">
-      <button class="back-btn" onclick="goScreen('home')">←</button>
-      <div class="screen-title">FREE PLAY</div>
-    </div>
-    <div class="setup-body">
+  <div class="screen-hdr">
+    <button class="back-btn" onclick="goScreen('home')">←</button>
+    <div class="screen-title">FREE PLAY</div>
+  </div>
+  <div class="scr-scroll">
+    <div class="home-card" style="margin-bottom:14px">
       <div class="sec-lbl">Difficulty</div>
       <div class="diff-grid">
         <button class="diff-card" id="dcEasy" onclick="setDiff('easy')">
@@ -579,7 +554,6 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
   </div>
 
   <div class="win-btns">
-    <button class="share-btn" id="shareBtn" onclick="shareResult()">📤 SHARE RESULT</button>
     <button class="gold-btn" onclick="goScreen('home')">🏠 HOME</button>
     <button class="outline-btn" id="winRetryBtn" onclick="retryGame()">↺ PLAY AGAIN</button>
     <button class="outline-btn" id="winPastBtn" onclick="goScreen('past')" style="display:none">🗓 PAST PUZZLES</button>
@@ -1496,67 +1470,6 @@ function setFb(el,type,html){if(!el)return;el.className=`inline-fb ${type}`;el.i
 function flashSlot(id){const el=document.getElementById(id);if(!el)return;el.classList.add('is-wrong');setTimeout(()=>el.classList.remove('is-wrong'),500);}
 
 // ── WIN + SOCIAL ───────────────────────────────────────────────────────────
-
-function shareResult() {
-  const N = G.chainLen;
-  const diffEmoji = {easy:'🟢', med:'🟡', hard:'🔴'}[G.diff];
-  const elapsed = Math.round((Date.now() - G.gameTs) / 1000);
-
-  // Build puzzle number if daily
-  let header = 'Actorly';
-  if (G.isDailyGame && G.dailyDate) {
-    const epoch = new Date('2026-03-10T12:00:00');
-    const day = new Date(G.dailyDate + 'T12:00:00');
-    const num = Math.round((day - epoch) / 86400000) + 1;
-    header = `Actorly #${num}`;
-  }
-
-  // Build emoji chain — start star, movie clapper per connection, end star
-  const chainEmoji = ['⭐'];
-  for (let i = 0; i < N - 1; i++) chainEmoji.push('🎬');
-  chainEmoji.push('⭐');
-
-  // Wrong attempts squares
-  const attemptsRow = G.wrongCount > 0
-    ? `\n❌ ${G.wrongCount} wrong attempt${G.wrongCount === 1 ? '' : 's'}`
-    : '';
-
-  const text =
-    `${header} ${diffEmoji}\n` +
-    `${chainEmoji.join(' → ')}\n` +
-    `⏱ ${fmt(elapsed)}${attemptsRow}\n` +
-    `actorly.org`;
-
-  const btn = document.getElementById('shareBtn');
-
-  if (navigator.share) {
-    navigator.share({ text }).catch(() => {});
-  } else {
-    navigator.clipboard.writeText(text).then(() => {
-      btn.textContent = '✓ COPIED TO CLIPBOARD';
-      btn.classList.add('copied');
-      setTimeout(() => {
-        btn.textContent = '📤 SHARE RESULT';
-        btn.classList.remove('copied');
-      }, 2500);
-    }).catch(() => {
-      // fallback for older browsers
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-      btn.textContent = '✓ COPIED!';
-      btn.classList.add('copied');
-      setTimeout(() => {
-        btn.textContent = '📤 SHARE RESULT';
-        btn.classList.remove('copied');
-      }, 2500);
-    });
-  }
-}
-
 async function showWin() {
   killClock();
   const N=G.chainLen, moves=N-2;
