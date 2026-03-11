@@ -155,9 +155,9 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
 /* GAME */
 #game{background:var(--dark)}
 .game-hdr{background:var(--surf);padding:10px 14px;display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.06)}
-.hdr-chain-bar{display:flex;align-items:center;justify-content:center;gap:0;width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.hdr-chain-bar{display:flex;align-items:center;justify-content:center;gap:0;width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:0 2px}
 .hdr-chain-bar::-webkit-scrollbar{display:none}
-.hdr-actor-name{font-size:12px;font-weight:700;white-space:nowrap;max-width:90px;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
+.hdr-actor-name{font-size:12px;font-weight:700;white-space:nowrap;flex-shrink:0}
 .hdr-actor-name.start{color:var(--easy-c)}
 .hdr-actor-name.end{color:var(--hard-c)}
 .hdr-step-node{display:flex;align-items:center;gap:0;flex-shrink:0}
@@ -370,12 +370,12 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
 </div>
 
 <!-- DAILY SETUP — pick difficulty then launch -->
-<div class="screen" id="dailysetup">
-  <div class="screen-hdr">
+<div class="screen" id="dailysetup" style="align-items:center">
+  <div class="screen-hdr" style="width:100%;max-width:560px">
     <button class="back-btn" onclick="goScreen('home')">←</button>
     <div class="screen-title">DAILY CHALLENGE</div>
   </div>
-  <div class="scr-scroll">
+  <div class="scr-scroll" style="width:100%;max-width:560px">
     <div class="daily-date-pill" id="dailySetupDate">TODAY</div>
     <div class="daily-actors-preview" id="dailyActorsPreview">
       <div class="dap-actor">
