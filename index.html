@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -122,6 +123,9 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
 .opt-lbl{font-size:15px;font-weight:500}
 .opt-sub{font-size:11px;color:var(–muted);margin-top:2px}
 .how-link{min-height:44px;display:flex;align-items:center;justify-content:center;margin-top:12px;font-size:13px;color:var(–muted);cursor:pointer;text-decoration:underline;position:relative;z-index:1;background:none;border:none;width:100%;font-family:‘DM Sans’,sans-serif;-webkit-appearance:none}
+.home-meta-btn{flex:1;min-height:44px;border-radius:12px;border:1.5px solid rgba(255,255,255,.1);background:var(–surf2);color:var(–text);font-size:13px;font-weight:600;font-family:‘DM Sans’,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;-webkit-appearance:none;transition:transform .15s}
+.home-meta-btn:active{transform:scale(.97)}
+.home-meta-btn.gold{border-color:rgba(245,166,35,.35);background:rgba(245,166,35,.1);color:var(–gold)}
 
 /* API SETUP */
 .inp-wrap label{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(–muted);display:block;margin-bottom:7px}
@@ -188,7 +192,7 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
 .steps-badge{font-size:11px;color:var(–muted);background:var(–surf2);padding:3px 8px;border-radius:20px;border:1px solid rgba(255,255,255,.07)}
 .quit-btn{margin-left:auto;background:none;border:none;color:var(–muted);font-size:22px;cursor:pointer;min-width:36px;min-height:36px;display:flex;align-items:center;justify-content:center;-webkit-appearance:none;border-radius:8px}
 
-.chain-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 14px 120px}
+.chain-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 14px 24px}
 
 /* Slot */
 .actor-slot{background:var(–surf);border-radius:18px;padding:14px;margin-bottom:4px;border:2px solid transparent;transition:border-color .2s}
@@ -243,14 +247,15 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
 
 /* Submit bar */
 .submit-bar{display:none!important}
-.fixed-submit-bar{padding:12px 14px calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,var(–dark) 60%,transparent);flex-shrink:0}
+.fixed-submit-bar{padding:12px 14px calc(16px + env(safe-area-inset-bottom,0px));background:var(–dark);border-top:1px solid rgba(255,255,255,.06);flex-shrink:0}
 .submit-bar-inner{pointer-events:all}
 .submit-chain-btn{width:100%;min-height:54px;padding:14px;border:none;border-radius:16px;font-family:‘Bebas Neue’,sans-serif;font-size:22px;letter-spacing:3px;cursor:pointer;transition:transform .15s,box-shadow .2s;-webkit-appearance:none;display:flex;align-items:center;justify-content:center;gap:8px}
 .submit-chain-btn.easy{background:linear-gradient(135deg,var(–easy-c),#5DF5C8);color:#052e1f;box-shadow:0 6px 24px rgba(45,212,160,.35)}
 .submit-chain-btn.med{background:linear-gradient(135deg,var(–med-c),#FFD166);color:#1a0e00;box-shadow:0 6px 24px rgba(245,166,35,.35)}
-.submit-chain-btn.hard{background:linear-gradient(135deg,var(–hard-c),#FF6B7A);color:#fff;box-shadow:0 6px 24px rgba(232,52,74,.35)}
+.submit-chain-btn.hard{background:linear-gradient(135deg,#555,#444);color:rgba(255,255,255,.5);box-shadow:none}
 .submit-chain-btn:active{transform:scale(.97)}
 .submit-chain-btn.dim{opacity:.32;pointer-events:none;box-shadow:none}
+.submit-chain-btn.ready{background:linear-gradient(135deg,var(–easy-c),#5DF5C8)!important;color:#052e1f!important;box-shadow:0 6px 28px rgba(45,212,160,.45)!important}
 
 /* WIN */
 #win{align-items:center;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:30px 16px 44px;gap:16px;background:var(–dark);position:relative}
@@ -371,6 +376,7 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
       <div class="mc-arrow" id="dailyArrow">▶</div>
     </button>
 
+```
 <!-- Free Play -->
 <button class="mode-card freeplay" onclick="goFreePlay()">
   <div class="mc-icon">🎬</div>
@@ -392,13 +398,13 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
   </div>
   <div class="mc-arrow" style="color:var(--muted)">▶</div>
 </button>
-
+```
 
   </div>
 
-  <div style="display:flex;gap:12px;margin-top:16px;position:relative;z-index:1;width:100%;max-width:420px">
-    <button class="how-link" onclick="openHow()" style="flex:1;margin-top:0">How to Play</button>
-    <button class="how-link" onclick="goScreen('stats')" style="flex:1;margin-top:0;color:var(--gold)">📊 My Stats</button>
+  <div style="display:flex;gap:10px;margin-top:16px;position:relative;z-index:1;width:100%;max-width:420px">
+    <button class="home-meta-btn" onclick="openHow()">❓ How to Play</button>
+    <button class="home-meta-btn gold" onclick="goScreen('stats')">📊 My Stats</button>
   </div>
 </div>
 
@@ -423,6 +429,7 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
       </div>
     </div>
 
+```
 <div class="home-card">
   <div class="daily-hard-notice">
     <span class="diff-icon">🔴</span>
@@ -441,7 +448,7 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
   </div>
   <button class="gold-btn" id="dailyPlayBtn" onclick="launchDailyGame()">📅 PLAY TODAY'S PUZZLE</button>
 </div>
-
+```
 
   </div>
 </div>
@@ -474,7 +481,7 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
         </button>
       </div>
 
-
+```
   <div class="sec-lbl">Chain Length</div>
   <div class="slider-row"><span class="slider-val" id="slVal"></span><span class="slider-sub" id="slSub"></span></div>
   <div class="slider-wrap"><input type="range" min="3" max="8" value="5" oninput="updSlider(this.value)"></div>
@@ -494,7 +501,7 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
 
   <button class="gold-btn" onclick="goSetup()">🎬 CHOOSE STARS</button>
 </div>
-
+```
 
   </div>
 </div>
@@ -1364,9 +1371,9 @@ function renderChain() {
     const fsBtn = document.getElementById('fixedSubmitBtn');
     if (fsb && fsBtn) {
       fsb.style.display = 'block';
-      fsBtn.className = `submit-chain-btn ${cls}${ready ? '' : ' dim'}`;
+      fsBtn.className = `submit-chain-btn ${cls}${ready ? ' ready' : ' dim'}`;
       fsBtn.setAttribute('onclick', ready ? fn : '');
-      fsBtn.innerHTML = `${icon} SUBMIT CHAIN`;
+      fsBtn.innerHTML = ready ? `✓ SUBMIT CHAIN` : `SUBMIT CHAIN`;
     }
   }
 
@@ -1648,5 +1655,6 @@ function confirmQuit() {
 // ── BOOT ───────────────────────────────────────────────────────────────────
 init();
 </script>
+
 </body>
 </html>
