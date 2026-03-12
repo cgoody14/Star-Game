@@ -195,7 +195,7 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
 .chain-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 14px 24px}
 
 /* Slot */
-.actor-slot{background:var(--surf);border-radius:14px;padding:10px 12px;margin-bottom:4px;border:2px solid transparent;transition:border-color .2s}
+.actor-slot{background:var(--surf);border-radius:12px;padding:8px 10px;margin-bottom:4px;border:2px solid transparent;transition:border-color .2s}
 .actor-slot.is-start{border-color:rgba(45,212,160,.3)}
 .actor-slot.is-end{border-color:rgba(232,52,74,.3)}
 .actor-slot.is-active{border-color:rgba(245,166,35,.4);background:var(--surf2)}
@@ -931,6 +931,19 @@ function goFreePlay() {
 
 function goDailySetup() {
   if (!G.dailyPuzzle) { alert('No puzzle today — check back tomorrow!'); return; }
+  // If already completed, restore state and show results instead of setup
+  const todayDate = G.dailyPuzzle.puzzle_date;
+  for (const diff of ['easy','med','hard']) {
+    const raw = localStorage.getItem(`sc_result_${todayDate}_${diff}`);
+    if (!raw) continue;
+    try {
+      const r = JSON.parse(raw);
+      G.chain = r.chain; G.chainLen = r.chainLen; G.diff = r.diff;
+      G.wrongCount = r.wrongCount; G.gameTs = Date.now() - r.elapsed * 1000;
+      G.dailyDate = r.dailyDate; G.isDailyGame = true;
+      showWin(); return;
+    } catch(e) {}
+  }
   const p = G.dailyPuzzle;
   const dateStr = new Date(p.puzzle_date + 'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
   const epoch = new Date('2026-03-10T12:00:00');
@@ -1211,11 +1224,11 @@ function renderChain() {
     if (actor || isStart || isEnd) {
       const ph = actor?.profile_path ? IMG(actor.profile_path,'w92') : null;
       h += `<div class="${sc}${actorErr?' is-wrong':''}" id="slot${i}">` +
-        `<span class="af-badge ${bc}">${bt}</span>` +
         `<div class="actor-filled">` +
-        (ph ? `<img class="af-av" src="${ph}"/>` : `<div class="af-av" style="display:flex;align-items:center;justify-content:center;font-size:20px">👤</div>`) +
+        `<span class="af-badge ${bc}" style="flex-shrink:0">${bt}</span>` +
+        (ph ? `<img class="af-av" src="${ph}"/>` : `<div class="af-av" style="display:flex;align-items:center;justify-content:center;font-size:18px">👤</div>`) +
         `<div><div class="af-nm">${esc(actor?.name||'')}</div>` +
-        (actorErr?`<div style="font-size:11px;color:#ff8095;margin-top:2px">${actorErr.msg}</div>`:'<div class="af-sub">'+(isStart?'Start':'') + (isEnd?'End':'')+'</div>') +
+        (actorErr?`<div style="font-size:11px;color:#ff8095;margin-top:1px">${actorErr.msg}</div>`:'') +
         `</div></div>` +
         (mh&&!isStart&&!isEnd?`<div class="slot-action-row"><button class="slot-edit-btn" onclick="clearMhActor(${i})">✕ Change</button></div>`:'') +
         (canEditActor?`<div class="slot-action-row"><button class="slot-edit-btn" onclick="editStep(${i})">✏️ Edit Actor</button></div>`:'') +
@@ -1469,6 +1482,10 @@ async function showWin() {
       const chainActors = G.chain.map(s=>({id:s.actor?.id, name:s.actor?.name, img:s.actor?.profile_path}));
       const chainMovies = G.chain.slice(0,-1).map(s=>({id:s.title?.id, title:s.title?.title||s.title?.name||''}));
       localStorage.setItem(`sc_done_${G.dailyDate}_${G.diff}`, '1');
+      localStorage.setItem(`sc_result_${G.dailyDate}_${G.diff}`, JSON.stringify({
+        chain: G.chain, chainLen: G.chainLen, diff: G.diff,
+        wrongCount: G.wrongCount, elapsed: elapsed, dailyDate: G.dailyDate
+      }));
       try {
         await submitToDB({
           puzzle_date: G.dailyDate,
