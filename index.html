@@ -195,20 +195,20 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
 .chain-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 14px 24px}
 
 /* Slot */
-.actor-slot{background:var(--surf);border-radius:18px;padding:14px;margin-bottom:4px;border:2px solid transparent;transition:border-color .2s}
+.actor-slot{background:var(--surf);border-radius:14px;padding:10px 12px;margin-bottom:4px;border:2px solid transparent;transition:border-color .2s}
 .actor-slot.is-start{border-color:rgba(45,212,160,.3)}
 .actor-slot.is-end{border-color:rgba(232,52,74,.3)}
 .actor-slot.is-active{border-color:rgba(245,166,35,.4);background:var(--surf2)}
 .actor-slot.is-wrong{animation:shake .3s}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-.af-badge{font-size:9px;letter-spacing:3px;text-transform:uppercase;font-weight:700;display:inline-block;margin-bottom:7px;padding:3px 8px;border-radius:20px}
+.af-badge{font-size:8px;letter-spacing:2px;text-transform:uppercase;font-weight:700;display:inline-block;margin-bottom:5px;padding:2px 7px;border-radius:20px}
 .af-badge.start{background:rgba(45,212,160,.15);color:var(--easy-c)}
 .af-badge.end{background:rgba(232,52,74,.15);color:var(--hard-c)}
 .af-badge.mid{background:rgba(245,166,35,.12);color:var(--gold)}
-.actor-filled{display:flex;align-items:center;gap:10px}
-.af-av{width:44px;height:44px;border-radius:50%;object-fit:cover;background:var(--surf3);flex-shrink:0}
-.af-nm{font-size:15px;font-weight:600}
-.af-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.actor-filled{display:flex;align-items:center;gap:8px}
+.af-av{width:36px;height:36px;border-radius:50%;object-fit:cover;background:var(--surf3);flex-shrink:0}
+.af-nm{font-size:14px;font-weight:600}
+.af-sub{font-size:10px;color:var(--muted);margin-top:1px}
 .actor-search .slot-label{font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.4}
 .inline-srch-wrap{position:relative}
 .inline-inp{width:100%;background:var(--surf3);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;padding:13px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:16px;outline:none;transition:border-color .2s;-webkit-appearance:none}
@@ -247,7 +247,7 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
 
 /* Submit bar */
 .submit-bar{display:none!important}
-.fixed-submit-bar{padding:12px 14px calc(16px + env(safe-area-inset-bottom,0px));background:var(--dark);border-top:1px solid rgba(255,255,255,.06);flex-shrink:0}
+.fixed-submit-bar{padding:12px 14px max(20px,env(safe-area-inset-bottom));background:var(--dark);border-top:1px solid rgba(255,255,255,.06);flex-shrink:0}
 .submit-bar-inner{pointer-events:all}
 .submit-chain-btn{width:100%;min-height:54px;padding:14px;border:none;border-radius:16px;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;cursor:pointer;transition:transform .15s,box-shadow .2s;-webkit-appearance:none;display:flex;align-items:center;justify-content:center;gap:8px}
 .submit-chain-btn.easy{background:linear-gradient(135deg,var(--easy-c),#5DF5C8);color:#052e1f;box-shadow:0 6px 24px rgba(45,212,160,.35)}
@@ -290,12 +290,27 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
 
 /* WIN BUTTONS */
 .win-btns{width:100%;max-width:400px;display:flex;flex-direction:column;gap:10px;position:relative;z-index:1}
-.share-btn{width:100%;min-height:52px;padding:14px;background:#f5a623;color:#fff;border:none;border-radius:50px;font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;cursor:pointer;transition:transform .15s,box-shadow .2s;box-shadow:0 4px 18px rgba(245,166,35,.4);-webkit-appearance:none;display:flex;align-items:center;justify-content:center;gap:8px}
+.share-btn{width:100%;min-height:52px;padding:14px;background:linear-gradient(135deg,#1d9bf0,#0d84d4);color:#fff;border:none;border-radius:50px;font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;cursor:pointer;transition:transform .15s,box-shadow .2s;box-shadow:0 4px 18px rgba(29,155,240,.4);-webkit-appearance:none;display:flex;align-items:center;justify-content:center;gap:8px}
 .share-btn:active{transform:scale(.97)}
-/* Share toast */
-.share-toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(12px);background:rgba(40,40,40,.97);color:#fff;padding:11px 22px;border-radius:30px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:12px;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.4)}
-.share-toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
-.toast-share-btn{background:none;border:none;color:var(--gold);cursor:pointer;font-size:14px;font-weight:700;padding:0;letter-spacing:.5px}
+/* Win desktop layout */
+.win-content-row{width:100%;max-width:400px;display:flex;flex-direction:column;gap:12px;position:relative;z-index:1}
+@media(min-width:768px){
+  #win{padding:20px 32px 44px}
+  .win-content-row{max-width:820px;flex-direction:row;align-items:flex-start}
+  .win-content-row .win-chain-wrap,.win-content-row .social-wrap{flex:1;max-width:none}
+  .win-stats,.win-section-label,.win-btns{max-width:820px}
+}
+/* Share modal */
+.share-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9998;opacity:0;transition:opacity .25s;pointer-events:none}
+.share-overlay.show{opacity:1;pointer-events:auto}
+.share-modal{position:fixed;bottom:0;left:0;right:0;background:var(--surf);border-radius:22px 22px 0 0;padding:14px 20px max(24px,env(safe-area-inset-bottom));z-index:9999;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.share-modal.show{transform:translateY(0)}
+.share-modal-handle{width:40px;height:4px;background:rgba(255,255,255,.2);border-radius:2px;margin:0 auto 14px}
+.share-modal-copied{text-align:center;font-size:17px;font-weight:700;margin-bottom:16px;color:var(--easy-c)}
+.share-action-btn{width:100%;padding:14px;border:none;border-radius:14px;font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;-webkit-appearance:none}
+.share-action-btn.sms{background:linear-gradient(135deg,var(--easy-c),#5DF5C8);color:#052e1f}
+.share-action-btn.native{background:linear-gradient(135deg,#1d9bf0,#0d84d4);color:#fff}
+.share-modal-done{width:100%;padding:12px;background:none;border:1px solid rgba(255,255,255,.15);border-radius:14px;color:var(--muted);font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:2px;cursor:pointer;margin-top:2px}
 
 .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
 .stat-card{background:var(--surf);border-radius:18px;padding:18px 14px;border:1px solid rgba(255,255,255,.07);text-align:center}
@@ -378,6 +393,7 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
         <div class="mc-label" id="dailyLabel">DAILY CHALLENGE</div>
         <div class="mc-title" id="dailyTitle">PUZZLE #—</div>
         <div class="mc-sub" id="dailySub">Loading…</div>
+        <div id="dailyCountdown" style="display:none;font-size:11px;letter-spacing:1px;color:var(--muted);margin-top:3px"></div>
       </div>
       <div class="mc-arrow" id="dailyArrow">▶</div>
     </button>
@@ -552,12 +568,13 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
   <div class="win-title">CHAIN COMPLETE!</div>
   <div class="win-section-label">STATISTICS</div>
   <div class="win-stats" id="winStats"></div>
-  <div class="win-chain-wrap"><div id="winChain"></div></div>
-
-  <!-- Social comparison -->
-  <div class="social-wrap" id="socialWrap" style="display:none">
-    <div class="social-title">🌍 How Others Connected</div>
-    <div id="socialCards"></div>
+  <div class="win-content-row">
+    <div class="win-chain-wrap"><div id="winChain"></div></div>
+    <!-- Social comparison -->
+    <div class="social-wrap" id="socialWrap" style="display:none">
+      <div class="social-title">🌍 How Others Connected</div>
+      <div id="socialCards"></div>
+    </div>
   </div>
 
   <div class="win-btns">
@@ -858,7 +875,8 @@ async function loadDailyBanner() {
       card.classList.add('done');
       labelEl.textContent = `✓ COMPLETED ${badges}`;
       arrowEl.textContent = '✓';
-      subEl.textContent = 'Completed! Tap to play again';
+      subEl.textContent = 'Completed!';
+      startDailyCountdown();
     } else {
       card.classList.remove('done');
       labelEl.textContent = 'DAILY CHALLENGE';
@@ -1436,9 +1454,10 @@ async function showWin() {
   const retryBtn = document.getElementById('winRetryBtn');
   const pastBtn = document.getElementById('winPastBtn');
   if (G.isDailyGame) {
-    retryBtn.textContent = '↺ RETRY THIS PUZZLE';
+    retryBtn.style.display = 'none';
     pastBtn.style.display = 'block';
   } else {
+    retryBtn.style.display = 'block';
     retryBtn.textContent = '↺ PLAY AGAIN';
     pastBtn.style.display = 'none';
   }
@@ -1487,30 +1506,60 @@ function shareResult() {
   const doCopy = navigator.clipboard
     ? navigator.clipboard.writeText(text)
     : Promise.reject();
-  doCopy.then(() => showShareToast(text)).catch(() => {
+  doCopy.then(() => showShareModal(text)).catch(() => {
     try {
       const ta = document.createElement('textarea');
       ta.value = text; ta.style.cssText = 'position:fixed;opacity:0';
       document.body.appendChild(ta); ta.select(); document.execCommand('copy');
-      document.body.removeChild(ta); showShareToast(text);
+      document.body.removeChild(ta); showShareModal(text);
     } catch(e) { prompt('Copy your result:', text); }
   });
 }
 
-function showShareToast(text) {
-  const toast = document.getElementById('shareToast');
-  const shareBtn = document.getElementById('toastShareBtn');
+function showShareModal(text) {
+  const overlay = document.getElementById('shareOverlay');
+  const modal = document.getElementById('shareModal');
+  const actions = document.getElementById('shareModalActions');
+  const encoded = encodeURIComponent(text);
+  let btns = '';
+  // SMS / iMessage link (works on iOS + Android)
+  btns += `<a class="share-action-btn sms" href="sms:?body=${encoded}" style="text-decoration:none">💬 Send as Text / iMessage</a>`;
   if (navigator.share) {
-    shareBtn.style.display = 'inline';
-    shareBtn.onclick = () => navigator.share({ text }).catch(() => {});
-  } else {
-    shareBtn.style.display = 'none';
+    btns += `<button class="share-action-btn native" onclick="navigator.share({text:${JSON.stringify(text)}}).catch(()=>{})">📤 More Options</button>`;
   }
-  toast.classList.remove('show');
-  void toast.offsetWidth; // force reflow to restart animation
-  toast.classList.add('show');
-  clearTimeout(toast._t);
-  toast._t = setTimeout(() => toast.classList.remove('show'), 3000);
+  actions.innerHTML = btns;
+  overlay.classList.add('show');
+  modal.classList.add('show');
+}
+
+function closeShareModal() {
+  document.getElementById('shareOverlay').classList.remove('show');
+  document.getElementById('shareModal').classList.remove('show');
+}
+
+function msTilMidnightET() {
+  const fmt = new Intl.DateTimeFormat('en-US', {timeZone:'America/New_York',hour:'numeric',minute:'numeric',second:'numeric',hour12:false}).formatToParts(new Date());
+  const h = +fmt.find(p=>p.type==='hour').value;
+  const m = +fmt.find(p=>p.type==='minute').value;
+  const s = +fmt.find(p=>p.type==='second').value;
+  return ((23-h)*3600 + (59-m)*60 + (60-s)) * 1000;
+}
+
+function startDailyCountdown() {
+  const el = document.getElementById('dailyCountdown');
+  if (!el) return;
+  el.style.display = 'block';
+  clearInterval(window._cdTimer);
+  function tick() {
+    const ms = msTilMidnightET();
+    const h = Math.floor(ms/3600000);
+    const mn = Math.floor((ms%3600000)/60000);
+    const sc = Math.floor((ms%60000)/1000);
+    const pad = n => String(n).padStart(2,'0');
+    el.textContent = `Next puzzle in ${pad(h)}:${pad(mn)}:${pad(sc)}`;
+  }
+  tick();
+  window._cdTimer = setInterval(tick, 1000);
 }
 
 async function renderSocialStats(date, myMovies) {
@@ -1565,9 +1614,12 @@ function confirmQuit() {
 // ── BOOT ───────────────────────────────────────────────────────────────────
 init();
 </script>
-<div class="share-toast" id="shareToast">
-  <span>✓ Copied to clipboard</span>
-  <button class="toast-share-btn" id="toastShareBtn" style="display:none">Share →</button>
+<div class="share-overlay" id="shareOverlay" onclick="closeShareModal()"></div>
+<div class="share-modal" id="shareModal">
+  <div class="share-modal-handle"></div>
+  <div class="share-modal-copied">✓ Copied to clipboard!</div>
+  <div id="shareModalActions"></div>
+  <button class="share-modal-done" onclick="closeShareModal()">DONE</button>
 </div>
 </body>
 </html>
