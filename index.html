@@ -1465,7 +1465,6 @@ async function showWin() {
 // CHANGE 2: shareResult function
 function shareResult() {
   const N = G.chainLen;
-  const elapsed = Math.round((Date.now() - G.gameTs) / 1000);
   const diffEmoji = {easy:'🟢',med:'🟡',hard:'🔴'}[G.diff];
   const epoch = new Date('2026-03-10T12:00:00');
   const puzzleDay = G.dailyDate ? new Date(G.dailyDate + 'T12:00:00') : null;
@@ -1473,13 +1472,16 @@ function shareResult() {
   const header = G.isDailyGame && puzzleNum
     ? `Actorly #${puzzleNum} ${diffEmoji}`
     : `Actorly ${diffEmoji}`;
-  // Build chain emoji string: ⭐ → 🎬 → 🎬 → ⭐
-  const chainEmoji = G.chain.map((s, i) => {
-    if (i === 0 || i === N-1) return '⭐';
-    return '🎬';
-  }).join(' → ');
-  const wrongStr = G.wrongCount === 0 ? 'No wrong attempts' : `❌ ${G.wrongCount} wrong attempt${G.wrongCount===1?'':'s'}`;
-  const text = `${header}\n${chainEmoji}\n⏱ ${fmt(elapsed)}\n${wrongStr}\nactorly.org`;
+  // Winning chain row: ⭐ for endpoints, 🟩 for each middle link (Wordle-style squares)
+  const chainRow = G.chain.map((_, i) => (i === 0 || i === N - 1) ? '⭐' : '🟩').join('');
+  // For med/hard: each submit attempt is like a Wordle guess — show failed rows as ⬛
+  // wrongCount is incremented on every submit (including the successful one), so failed = wrongCount - 1
+  let grid = '';
+  if (G.diff !== 'easy' && G.wrongCount > 1) {
+    grid = ('⬛'.repeat(N) + '\n').repeat(G.wrongCount - 1);
+  }
+  grid += chainRow;
+  const text = `${header}\n\n${grid}\n\nactorly.org`;
 
   const btn = document.getElementById('shareBtn');
   if (navigator.share) {
