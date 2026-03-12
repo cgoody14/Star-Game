@@ -300,17 +300,9 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
   .win-content-row .win-chain-wrap,.win-content-row .social-wrap{flex:1;max-width:none}
   .win-stats,.win-section-label,.win-btns{max-width:820px}
 }
-/* Share modal */
-.share-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9998;opacity:0;transition:opacity .25s;pointer-events:none}
-.share-overlay.show{opacity:1;pointer-events:auto}
-.share-modal{position:fixed;bottom:0;left:0;right:0;background:var(--surf);border-radius:22px 22px 0 0;padding:14px 20px max(24px,env(safe-area-inset-bottom));z-index:9999;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
-.share-modal.show{transform:translateY(0)}
-.share-modal-handle{width:40px;height:4px;background:rgba(255,255,255,.2);border-radius:2px;margin:0 auto 14px}
-.share-modal-copied{text-align:center;font-size:17px;font-weight:700;margin-bottom:16px;color:var(--easy-c)}
-.share-action-btn{width:100%;padding:14px;border:none;border-radius:14px;font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;-webkit-appearance:none}
-.share-action-btn.sms{background:linear-gradient(135deg,var(--easy-c),#5DF5C8);color:#052e1f}
-.share-action-btn.native{background:linear-gradient(135deg,#1d9bf0,#0d84d4);color:#fff}
-.share-modal-done{width:100%;padding:12px;background:none;border:1px solid rgba(255,255,255,.15);border-radius:14px;color:var(--muted);font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:2px;cursor:pointer;margin-top:2px}
+/* Copied toast */
+.copied-toast{position:fixed;bottom:40px;left:50%;transform:translateX(-50%) translateY(8px);background:rgba(30,30,30,.95);color:#fff;padding:10px 22px;border-radius:30px;font-size:14px;font-weight:600;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.4)}
+.copied-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
 .stat-card{background:var(--surf);border-radius:18px;padding:18px 14px;border:1px solid rgba(255,255,255,.07);text-align:center}
@@ -1544,41 +1536,35 @@ function shareResult() {
     return '🎬';
   }).join(' → ');
   const wrongStr = G.wrongCount === 0 ? 'No wrong attempts' : `❌ ${G.wrongCount} wrong attempt${G.wrongCount===1?'':'s'}`;
-  const text = `${header}\n${chainEmoji}\n⏱ ${fmt(elapsed)}\n${wrongStr}\nactorly.org`;
+  const text = `${header}\n${chainEmoji}\n⏱ ${fmt(elapsed)}\n${wrongStr}\nhttps://actorly.org`;
 
-  // Always copy to clipboard, then show toast
-  const doCopy = navigator.clipboard
-    ? navigator.clipboard.writeText(text)
-    : Promise.reject();
-  doCopy.then(() => showShareModal(text)).catch(() => {
-    try {
-      const ta = document.createElement('textarea');
-      ta.value = text; ta.style.cssText = 'position:fixed;opacity:0';
-      document.body.appendChild(ta); ta.select(); document.execCommand('copy');
-      document.body.removeChild(ta); showShareModal(text);
-    } catch(e) { prompt('Copy your result:', text); }
-  });
-}
-
-function showShareModal(text) {
-  const overlay = document.getElementById('shareOverlay');
-  const modal = document.getElementById('shareModal');
-  const actions = document.getElementById('shareModalActions');
-  const encoded = encodeURIComponent(text);
-  let btns = '';
-  // SMS / iMessage link (works on iOS + Android)
-  btns += `<a class="share-action-btn sms" href="sms:?body=${encoded}" style="text-decoration:none">💬 Send as Text / iMessage</a>`;
   if (navigator.share) {
-    btns += `<button class="share-action-btn native" onclick="navigator.share({text:${JSON.stringify(text)}}).catch(()=>{})">📤 More Options</button>`;
+    // Mobile: native share sheet (iMessage, Messages, etc.)
+    navigator.clipboard?.writeText(text).catch(()=>{});
+    navigator.share({ text }).catch(() => {});
+  } else {
+    // Desktop: copy + toast
+    const doCopy = navigator.clipboard
+      ? navigator.clipboard.writeText(text)
+      : Promise.reject();
+    doCopy.then(() => showCopiedToast()).catch(() => {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text; ta.style.cssText = 'position:fixed;opacity:0';
+        document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+        document.body.removeChild(ta); showCopiedToast();
+      } catch(e) { prompt('Copy your result:', text); }
+    });
   }
-  actions.innerHTML = btns;
-  overlay.classList.add('show');
-  modal.classList.add('show');
 }
 
-function closeShareModal() {
-  document.getElementById('shareOverlay').classList.remove('show');
-  document.getElementById('shareModal').classList.remove('show');
+function showCopiedToast() {
+  const toast = document.getElementById('copiedToast');
+  toast.classList.remove('show');
+  void toast.offsetWidth;
+  toast.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => toast.classList.remove('show'), 2500);
 }
 
 function msTilMidnightET() {
@@ -1658,12 +1644,6 @@ function confirmQuit() {
 // ── BOOT ───────────────────────────────────────────────────────────────────
 init();
 </script>
-<div class="share-overlay" id="shareOverlay" onclick="closeShareModal()"></div>
-<div class="share-modal" id="shareModal">
-  <div class="share-modal-handle"></div>
-  <div class="share-modal-copied">✓ Copied to clipboard!</div>
-  <div id="shareModalActions"></div>
-  <button class="share-modal-done" onclick="closeShareModal()">DONE</button>
-</div>
+<div class="copied-toast" id="copiedToast">✓ Copied to clipboard</div>
 </body>
 </html>
