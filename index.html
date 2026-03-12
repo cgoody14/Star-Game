@@ -1465,6 +1465,7 @@ async function showWin() {
 // CHANGE 2: shareResult function
 function shareResult() {
   const N = G.chainLen;
+  const elapsed = Math.round((Date.now() - G.gameTs) / 1000);
   const diffEmoji = {easy:'🟢',med:'🟡',hard:'🔴'}[G.diff];
   const epoch = new Date('2026-03-10T12:00:00');
   const puzzleDay = G.dailyDate ? new Date(G.dailyDate + 'T12:00:00') : null;
@@ -1481,7 +1482,7 @@ function shareResult() {
     grid = ('⬛'.repeat(N) + '\n').repeat(G.wrongCount - 1);
   }
   grid += chainRow;
-  const text = `${header}\n\n${grid}\n\nactorly.org`;
+  const text = `${header}\n\n${grid}\n⏱ ${fmt(elapsed)}\n\nactorly.org`;
 
   const btn = document.getElementById('shareBtn');
   if (navigator.share) {
