@@ -1473,16 +1473,12 @@ function shareResult() {
   const header = G.isDailyGame && puzzleNum
     ? `Actorly #${puzzleNum} ${diffEmoji}`
     : `Actorly ${diffEmoji}`;
-  // Winning chain row: ⭐ for endpoints, 🟩 for each middle link (Wordle-style squares)
-  const chainRow = G.chain.map((_, i) => (i === 0 || i === N - 1) ? '⭐' : '🟩').join('');
-  // For med/hard: each submit attempt is like a Wordle guess — show failed rows as ⬛
-  // wrongCount is incremented on every submit (including the successful one), so failed = wrongCount - 1
-  let grid = '';
-  if (G.diff !== 'easy' && G.wrongCount > 1) {
-    grid = ('⬛'.repeat(N) + '\n').repeat(G.wrongCount - 1);
-  }
-  grid += chainRow;
-  const text = `${header}\n\n${grid}\n⏱ ${fmt(elapsed)}\n\nactorly.org`;
+  const chainEmoji = G.chain.map((s, i) => {
+    if (i === 0 || i === N-1) return '⭐';
+    return '🎬';
+  }).join(' → ');
+  const wrongStr = G.wrongCount === 0 ? 'No wrong attempts' : `❌ ${G.wrongCount} wrong attempt${G.wrongCount===1?'':'s'}`;
+  const text = `${header}\n${chainEmoji}\n⏱ ${fmt(elapsed)}\n${wrongStr}\nactorly.org`;
 
   const btn = document.getElementById('shareBtn');
   if (navigator.share) {
