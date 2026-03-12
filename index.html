@@ -1473,7 +1473,6 @@ function shareResult() {
   const header = G.isDailyGame && puzzleNum
     ? `Actorly #${puzzleNum} ${diffEmoji}`
     : `Actorly ${diffEmoji}`;
-  // Build chain emoji string: ⭐ → 🎬 → 🎬 → ⭐
   const chainEmoji = G.chain.map((s, i) => {
     if (i === 0 || i === N-1) return '⭐';
     return '🎬';
