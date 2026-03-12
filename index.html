@@ -929,10 +929,7 @@ function goFreePlay() {
   goScreen('freeplay');
 }
 
-function goDailySetup() {
-  if (!G.dailyPuzzle) { alert('No puzzle today — check back tomorrow!'); return; }
-  // If already completed, restore state and show results instead of setup
-  const todayDate = G.dailyPuzzle.puzzle_date;
+function tryShowDailyResult(todayDate) {
   for (const diff of ['easy','med','hard']) {
     const raw = localStorage.getItem(`sc_result_${todayDate}_${diff}`);
     if (!raw) continue;
@@ -941,9 +938,20 @@ function goDailySetup() {
       G.chain = r.chain; G.chainLen = r.chainLen; G.diff = r.diff;
       G.wrongCount = r.wrongCount; G.gameTs = Date.now() - r.elapsed * 1000;
       G.dailyDate = r.dailyDate; G.isDailyGame = true;
-      showWin(); return;
+      showWin(); return true;
     } catch(e) {}
   }
+  return false;
+}
+
+function goDailySetup() {
+  if (!G.dailyPuzzle) { alert('No puzzle today — check back tomorrow!'); return; }
+  const todayDate = G.dailyPuzzle.puzzle_date;
+  // If result saved, show win screen directly
+  if (tryShowDailyResult(todayDate)) return;
+  // If completed but result not saved (completed before this feature), block replay
+  const doneAny = ['easy','med','hard'].some(d => localStorage.getItem(`sc_done_${todayDate}_${d}`));
+  if (doneAny) { goScreen('home'); return; }
   const p = G.dailyPuzzle;
   const dateStr = new Date(p.puzzle_date + 'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
   const epoch = new Date('2026-03-10T12:00:00');
@@ -961,6 +969,10 @@ function goDailySetup() {
 
 function launchDailyGame() {
   if (!G.dailyPuzzle) return;
+  const todayDate = G.dailyPuzzle.puzzle_date;
+  if (tryShowDailyResult(todayDate)) return;
+  const doneAny = ['easy','med','hard'].some(d => localStorage.getItem(`sc_done_${todayDate}_${d}`));
+  if (doneAny) { goScreen('home'); return; }
   G.diff = 'hard';
   playPuzzle(todayStr());
 }
