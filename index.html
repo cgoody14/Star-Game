@@ -1548,8 +1548,8 @@ function shareResult() {
   const header = G.isDailyGame && puzzleNum
     ? `Actorly #${puzzleNum} ⭐`
     : `Actorly ⭐`;
-  const startName = G.chain[0]?.name ?? G.chain[0];
-  const endName = G.chain[N-1]?.name ?? G.chain[N-1];
+  const startName = G.chain[0]?.actor?.name ?? '';
+  const endName = G.chain[N-1]?.actor?.name ?? '';
   const middleEmojis = G.chain.slice(1, N-1).map(() => '🎬').join(' → ');
   const chainLine = `${diffEmoji} ${startName} → ${middleEmojis} → ${endName} ${diffEmoji}`;
   const wrongStr = `${G.wrongCount} wrong`;
