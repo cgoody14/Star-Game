@@ -17,7 +17,7 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
 html,body{height:100%;overflow:hidden}
 body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--text);touch-action:manipulation}
-.screen{display:none;flex-direction:column;height:100dvh;height:100vh;overflow:hidden}
+.screen{display:none;flex-direction:column;height:100vh;height:100dvh;overflow:hidden}
 .screen.active{display:flex}
 .scr-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 40px}
 .back-btn{min-width:44px;min-height:44px;border-radius:12px;background:var(--surf2);border:1px solid rgba(255,255,255,.06);color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;-webkit-appearance:none}
@@ -160,6 +160,16 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
 .rand-btn:active{transform:scale(.97)}
 .rand-btn.loading{opacity:.6;pointer-events:none}
 
+/* HINTS MODAL */
+.hints-modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:flex-end;justify-content:center;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.hints-modal-ov.open{display:flex}
+.hints-sheet{background:var(--surf);border-radius:28px 28px 0 0;padding:20px 20px calc(28px + env(safe-area-inset-bottom,0px));width:100%;max-width:480px;max-height:75vh;overflow-y:auto;transform:translateY(100%);transition:transform .35s cubic-bezier(.4,0,.2,1)}
+.hints-modal-ov.open .hints-sheet{transform:translateY(0)}
+.hints-actor-label{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;margin-top:4px}
+.hints-movie-row{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--surf2);border-radius:10px;margin-bottom:6px}
+.hints-movie-title{font-size:13px;font-weight:600}
+.hints-movie-year{font-size:11px;color:var(--muted);margin-top:1px}
+
 /* GAME */
 #game{background:var(--dark)}
 .game-hdr{background:var(--surf);padding:10px 14px;display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.06)}
@@ -249,7 +259,8 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
 
 /* Submit bar */
 .submit-bar{display:none!important}
-.fixed-submit-bar{padding:12px 14px max(20px,env(safe-area-inset-bottom));background:var(--dark);border-top:1px solid rgba(255,255,255,.06);flex-shrink:0}
+.fixed-submit-bar{padding:12px 14px max(20px,env(safe-area-inset-bottom,0px));background:var(--dark);border-top:1px solid rgba(255,255,255,.06);flex-shrink:0}
+@media(max-width:767px){.fixed-submit-bar{padding-bottom:max(28px,env(safe-area-inset-bottom,0px))}}
 .submit-bar-inner{pointer-events:all}
 .submit-chain-btn{width:100%;min-height:54px;padding:14px;border:none;border-radius:16px;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;cursor:pointer;transition:transform .15s,box-shadow .2s;-webkit-appearance:none;display:flex;align-items:center;justify-content:center;gap:8px}
 .submit-chain-btn.easy{background:linear-gradient(135deg,var(--easy-c),#5DF5C8);color:#052e1f;box-shadow:0 6px 24px rgba(45,212,160,.35)}
@@ -567,6 +578,7 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
       <span class="steps-badge" id="stepsBadge"></span>
       <span class="live-clock" id="liveClock">0:00</span>
       <span class="timer-disp" id="timerDisp">5:00</span>
+      <button class="back-btn" id="hintsBtn" onclick="showHints()" style="font-size:11px;padding:0 8px;min-width:auto;min-height:28px;height:28px;font-weight:700;color:var(--gold);border-color:rgba(245,166,35,.3)">💡 HINTS</button>
       <button class="back-btn" onclick="confirmQuit()" style="font-size:11px;padding:0 8px;min-width:auto;min-height:28px;height:28px;font-weight:700;color:var(--muted)">✕ QUIT</button>
     </div>
   </div>
@@ -631,6 +643,16 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
   </div>
   <div class="scr-scroll" id="statsScroll">
     <div class="stats-loading"><div class="loading-dots"><span></span><span></span><span></span></div></div>
+  </div>
+</div>
+
+<!-- HINTS MODAL -->
+<div class="hints-modal-ov" id="hintsModal">
+  <div class="hints-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">💡 HINTS</div>
+    <div id="hintsContent"><div style="text-align:center;padding:30px"><div class="loading-dots"><span></span><span></span><span></span></div></div></div>
+    <button onclick="closeHints()" class="outline-btn" style="width:100%;margin-top:8px">Close</button>
   </div>
 </div>
 
@@ -1004,6 +1026,65 @@ async function launchDailyGame() {
   playPuzzle(todayStr());
 }
 
+// ── HINTS ──────────────────────────────────────────────────────────────────
+function showHints() {
+  const m = document.getElementById('hintsModal');
+  const content = document.getElementById('hintsContent');
+  content.innerHTML = '<div style="text-align:center;padding:30px"><div class="loading-dots"><span></span><span></span><span></span></div></div>';
+  m.style.display = 'none';
+  requestAnimationFrame(()=>{ m.style.display='flex'; requestAnimationFrame(()=>m.classList.add('open')); });
+  loadHints();
+}
+function closeHints() {
+  const m = document.getElementById('hintsModal');
+  m.classList.remove('open');
+  setTimeout(()=>{ m.style.display='none'; }, 350);
+}
+async function loadHints() {
+  const content = document.getElementById('hintsContent');
+  try {
+    const [sm, em] = await Promise.all([getCredits(G.startActor.id), getCredits(G.endActor.id)]);
+    const top3s = sm.slice(0,3), top3e = em.slice(0,3);
+    let html = '';
+    html += `<div class="hints-actor-label" style="color:var(--easy-c)">🎬 ${esc(G.startActor.name)}'s top movies</div>`;
+    top3s.forEach(m=>{ const yr=m.release_date?.slice(0,4)||''; html+=`<div class="hints-movie-row"><span style="font-size:20px">🎬</span><div><div class="hints-movie-title">${esc(m.title||m.name||'')}</div>${yr?`<div class="hints-movie-year">${yr}</div>`:''}</div></div>`; });
+    html += `<div class="hints-actor-label" style="color:var(--hard-c);margin-top:14px">🎬 ${esc(G.endActor.name)}'s top movies</div>`;
+    top3e.forEach(m=>{ const yr=m.release_date?.slice(0,4)||''; html+=`<div class="hints-movie-row"><span style="font-size:20px">🎬</span><div><div class="hints-movie-title">${esc(m.title||m.name||'')}</div>${yr?`<div class="hints-movie-year">${yr}</div>`:''}</div></div>`; });
+    content.innerHTML = html;
+  } catch(e) { content.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px">Could not load hints. Try again.</div>'; }
+}
+document.getElementById('hintsModal').addEventListener('click', e=>{ if(e.target.id==='hintsModal') closeHints(); });
+
+// ── WIP PERSISTENCE ─────────────────────────────────────────────────────────
+function saveWip() {
+  if (!G.isDailyGame || !G.dailyDate) return;
+  try {
+    localStorage.setItem(`sc_wip_${G.dailyDate}_${G.diff}`, JSON.stringify({
+      chain: G.chain, step: G.step, phase: G.phase,
+      pendingActor: G.pendingActor,
+      mhActors: G.mhActors, mhTitles: G.mhTitles,
+      usedActors: [...G.usedActors], usedTitles: [...G.usedTitles],
+      wrongCount: G.wrongCount, gameTs: G.gameTs,
+    }));
+  } catch(e) {}
+}
+function clearWip() {
+  if (G.dailyDate && G.diff) localStorage.removeItem(`sc_wip_${G.dailyDate}_${G.diff}`);
+}
+function loadWip(dateStr, diff) {
+  const raw = localStorage.getItem(`sc_wip_${dateStr}_${diff}`);
+  if (!raw) return false;
+  try {
+    const w = JSON.parse(raw);
+    G.chain = w.chain; G.step = w.step; G.phase = w.phase;
+    G.pendingActor = w.pendingActor || null;
+    G.mhActors = w.mhActors || {}; G.mhTitles = w.mhTitles || {};
+    G.usedActors = new Set(w.usedActors || []); G.usedTitles = new Set(w.usedTitles || []);
+    G.wrongCount = w.wrongCount || 0; G.gameTs = w.gameTs || Date.now();
+    return true;
+  } catch(e) { return false; }
+}
+
 function goSetup() {
   G.isDailyGame = false;
   resetSetup();
@@ -1025,7 +1106,21 @@ async function playPuzzle(dateStr) {
   G.endActor = { id: puzzle.end_actor_id, name: puzzle.end_actor_name, profile_path: puzzle.end_actor_img };
   G.chainLen = puzzle.chain_length;
   updSlider(G.chainLen);
-  startGame();
+  if (loadWip(dateStr, G.diff)) {
+    killTimer();
+    const dp = document.getElementById('dPill');
+    dp.textContent = {easy:'🟢 EASY',med:'🟡 MEDIUM',hard:'🔴 HARD'}[G.diff];
+    dp.className = `dpill ${G.diff}`;
+    renderHdrChain();
+    const fsb = document.getElementById('fixedSubmitBar');
+    if (fsb) fsb.style.display = 'block';
+    goScreen('game');
+    renderChain();
+    startLiveClock();
+    if (G.timerOn) startStepTimer();
+  } else {
+    startGame();
+  }
 }
 
 // ── SETUP ──────────────────────────────────────────────────────────────────
@@ -1373,6 +1468,7 @@ function renderChain() {
     const el = document.getElementById(focusId);
     if (el) el.scrollIntoView({behavior:'smooth',block:'center'});
   }, 120);
+  saveWip();
 }
 
 // ── MED/HARD ───────────────────────────────────────────────────────────────
@@ -1474,6 +1570,7 @@ function flashSlot(id){const el=document.getElementById(id);if(!el)return;el.cla
 
 // ── WIN + SHARE ────────────────────────────────────────────────────────────
 async function showWin() {
+  clearWip();
   killClock();
   const N=G.chainLen, moves=N-2;
   const elapsed=Math.round((Date.now()-G.gameTs)/1000);
@@ -1726,7 +1823,7 @@ function retryGame() {
 
 function confirmQuit() {
   killTimer();
-  if (confirm('Quit this game?')) { goScreen('home'); }
+  if (confirm('Quit this game?')) { clearWip(); goScreen('home'); }
   else { startStepTimer(); }
 }
 
