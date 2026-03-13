@@ -275,20 +275,14 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
 .wc-step{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:14px;font-weight:600}
 .wc-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .wc-ttl{font-size:12px;color:#93B4FF;padding:4px 0 4px 20px;font-weight:500}
+.wc-conn-divider{border-top:1px solid rgba(255,255,255,.06);margin:4px 0}
+.wc-conn-lbl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:6px 0 2px;font-weight:600}
+.wc-social-sub{font-size:11px;color:var(--muted);padding:0 0 4px 20px;line-height:1.4}
 
-/* SOCIAL comparison */
-.social-wrap{width:100%;max-width:400px;position:relative;z-index:1}
+/* SOCIAL comparison — matches chain card style */
+.social-wrap{width:100%;max-width:400px;position:relative;z-index:1;background:var(--surf);border-radius:16px;padding:12px 14px;border:1px solid rgba(255,255,255,.07)}
 .social-title{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;text-align:center}
-.social-card{background:var(--surf);border-radius:16px;padding:10px 12px;border:1px solid rgba(255,255,255,.07);margin-bottom:8px}
-.social-hdr{font-size:10px;color:var(--muted);margin-bottom:8px;font-weight:600;letter-spacing:1px;text-transform:uppercase}
-.social-movie-row{margin-bottom:8px}
-.social-movie-name{font-size:12px;font-weight:600;margin-bottom:3px;display:flex;align-items:center;gap:6px}
-.social-bar-wrap{position:relative;height:14px;background:var(--surf2);border-radius:7px;overflow:hidden}
-.social-bar-fill{height:100%;border-radius:7px;background:linear-gradient(90deg,rgba(37,99,235,.5),rgba(147,180,255,.4));transition:width 1s cubic-bezier(.4,0,.2,1)}
-.social-bar-fill.is-yours{background:linear-gradient(90deg,rgba(245,166,35,.6),rgba(255,209,102,.5))}
-.social-bar-pct{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:9px;font-weight:700;color:var(--text)}
 .social-yours-badge{font-size:9px;background:rgba(245,166,35,.2);color:var(--gold);border:1px solid rgba(245,166,35,.3);border-radius:20px;padding:1px 6px;letter-spacing:1px;text-transform:uppercase;font-weight:700}
-.social-count{font-size:10px;color:var(--muted);text-align:center;margin-top:6px}
 
 /* WIN BUTTONS */
 .win-btns{width:100%;max-width:400px;display:flex;flex-direction:column;gap:10px;position:relative;z-index:1}
@@ -299,10 +293,16 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
 /* Win desktop layout */
 .win-content-row{width:100%;max-width:400px;display:flex;flex-direction:column;gap:12px;position:relative;z-index:1}
 @media(min-width:768px){
-  #win{padding:20px 32px 44px}
-  .win-content-row{max-width:820px;flex-direction:row;align-items:flex-start}
-  .win-content-row .win-chain-wrap,.win-content-row .social-wrap{flex:1;max-width:none}
-  .win-stats,.win-section-label,.win-btns,.share-btn{max-width:820px}
+  #win{padding:12px 32px 16px;height:100dvh;overflow:hidden;gap:8px}
+  .win-emoji{font-size:32px}
+  .win-title{font-size:24px}
+  .win-section-label{display:none}
+  .win-stats{padding:8px 0;max-width:820px}
+  .win-content-row{max-width:820px;flex-direction:row;align-items:stretch;flex:1;min-height:0;gap:12px}
+  .win-content-row .win-chain-wrap,.win-content-row .social-wrap{flex:1;max-width:none;overflow-y:auto}
+  .win-btns,.share-btn{max-width:820px}
+  .share-btn{min-height:46px;font-size:20px}
+  .win-action-row .gold-btn,.win-action-row .outline-btn{min-height:46px}
 }
 @media(max-width:767px){
   .share-btn{position:sticky;bottom:16px;z-index:10}
@@ -582,7 +582,6 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
   <div class="win-emoji">🏆</div>
   <div class="win-title">CHAIN COMPLETE!</div>
   <button class="share-btn" id="shareBtn" onclick="shareResult()">Share 📤</button>
-  <div class="win-section-label">STATISTICS</div>
   <div class="win-stats" id="winStats"></div>
   <div class="win-content-row">
     <div class="win-chain-wrap"><div id="winChain"></div></div>
@@ -1690,6 +1689,7 @@ async function renderSocialStats(date, myMovies) {
     const total = allSubs.length;
     const connectorCount = myMovies.length;
     let html = '';
+    let firstConn = true;
     for (let pos=0; pos<connectorCount; pos++) {
       const tally = {};
       allSubs.forEach(sub => {
@@ -1704,16 +1704,18 @@ async function renderSocialStats(date, myMovies) {
         .sort((a,b)=>b.cnt-a.cnt).slice(0,4);
       if (!ranked.length) continue;
       const myMovieId = myMovies[pos]?.id?.toString();
-      const posLabel = pos===0 ? `Connection 1` : pos===connectorCount-1 ? `Final Connection` : `Connection ${pos+1}`;
-      html += `<div class="social-card"><div class="social-hdr">🎬 ${posLabel}</div>`;
+      const posLabel = pos===0 ? 'Connection 1' : pos===connectorCount-1 ? 'Final Connection' : `Connection ${pos+1}`;
+      if (!firstConn) html += `<div class="wc-conn-divider"></div>`;
+      firstConn = false;
+      html += `<div class="wc-conn-lbl">🎬 ${posLabel}</div>`;
       ranked.forEach(m => {
         const isYours = m.id?.toString() === myMovieId;
-        html += `<div class="social-movie-row"><div class="social-movie-name">${esc(m.title)}${isYours?'<span class="social-yours-badge">YOURS</span>':''}</div><div class="social-bar-wrap"><div class="social-bar-fill${isYours?' is-yours':''}" style="width:0%" data-pct="${m.pct}"></div><span class="social-bar-pct">${m.pct}%</span></div></div>`;
+        const dotColor = isYours ? 'var(--gold)' : '#93B4FF';
+        html += `<div class="wc-step"><div class="wc-dot" style="background:${dotColor}"></div><strong>${esc(m.title)}</strong>${isYours?'<span class="social-yours-badge">YOURS</span>':''}</div>`;
+        html += `<div class="wc-social-sub">${m.pct}% of players · ${m.cnt} completion${m.cnt!==1?'s':''}</div>`;
       });
-      html += `<div class="social-count">${total} player${total===1?'':'s'} completed this puzzle</div></div>`;
     }
     cardsEl.innerHTML = html || '<div style="text-align:center;color:var(--muted);padding:16px">Be the first to complete this puzzle!</div>';
-    setTimeout(()=>{ document.querySelectorAll('.social-bar-fill[data-pct]').forEach(el=>{ el.style.width = el.dataset.pct + '%'; }); }, 100);
   } catch(e) { wrap.style.display = 'none'; }
 }
 
