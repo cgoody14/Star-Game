@@ -383,6 +383,18 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
 #loadingOv{position:fixed;inset:0;background:var(--dark);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
 #loadingOv.hidden{display:none}
 .loading-logo{font-family:'Bebas Neue',sans-serif;font-size:40px;letter-spacing:6px;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+/* CIRCLE MODE */
+.mode-card.circle-mode{background:linear-gradient(135deg,rgba(138,43,226,.18),rgba(180,80,255,.1));border-color:rgba(160,80,255,.35);box-shadow:0 8px 32px rgba(138,43,226,.12)}
+.mode-card.circle-mode .mc-label{color:#C084FC}
+.mode-card.circle-mode .mc-arrow{color:#C084FC}
+#circlesetup{background:var(--dark);align-items:center}
+#circlesetup .screen-hdr{max-width:560px;width:100%}
+#circlesetup .scr-scroll{display:flex;flex-direction:column;align-items:center;width:100%}
+#circlesetup .scr-scroll .home-card{max-width:560px;width:100%}
+.af-badge.circle{background:rgba(192,132,252,.15);color:#C084FC}
+.actor-slot.is-circle-anchor{border-color:rgba(192,132,252,.4)}
+.circle-return-banner{background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.2);border-radius:12px;padding:10px 14px;margin:4px 0 8px;text-align:center;font-size:12px;color:#C084FC;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px}
 </style>
 </head>
 <body>
@@ -449,6 +461,17 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
         <div class="mc-sub">Catch up on previous days</div>
       </div>
       <div class="mc-arrow" style="color:var(--muted)">▶</div>
+    </button>
+
+    <!-- Complete the Circle -->
+    <button class="mode-card circle-mode" onclick="goCircleSetup()">
+      <div class="mc-icon">🔄</div>
+      <div class="mc-body">
+        <div class="mc-label">CIRCLE MODE</div>
+        <div class="mc-title">COMPLETE THE CIRCLE</div>
+        <div class="mc-sub">Loop 5 actors back to the start</div>
+      </div>
+      <div class="mc-arrow">▶</div>
     </button>
   </div>
 
@@ -568,6 +591,51 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
     </div>
     <div class="err-msg" id="setupErr"></div>
     <button class="gold-btn dim" id="playBtn" onclick="startGame()">START GAME</button>
+  </div>
+</div>
+
+<!-- CIRCLE SETUP -->
+<div class="screen" id="circlesetup">
+  <div class="screen-hdr">
+    <button class="back-btn" onclick="goScreen('home')">←</button>
+    <div class="screen-title">COMPLETE THE CIRCLE</div>
+  </div>
+  <div class="scr-scroll">
+    <div class="home-card" style="margin-bottom:14px">
+      <div class="sec-lbl">Difficulty</div>
+      <div class="diff-grid">
+        <button class="diff-card" id="circleDcEasy" onclick="setCircleDiff('easy')">
+          <span class="diff-icon">🟢</span>
+          <span class="diff-info"><span class="diff-name easy">Easy</span><span class="diff-desc">Wrong connections named on submit.</span></span>
+          <span class="diff-check"></span>
+        </button>
+        <button class="diff-card" id="circleDcMed" onclick="setCircleDiff('med')">
+          <span class="diff-icon">🟡</span>
+          <span class="diff-info"><span class="diff-name med">Medium</span><span class="diff-desc">Only which connection failed.</span></span>
+          <span class="diff-check"></span>
+        </button>
+        <button class="diff-card" id="circleDcHard" onclick="setCircleDiff('hard')">
+          <span class="diff-icon">🔴</span>
+          <span class="diff-info"><span class="diff-name hard">Hard</span><span class="diff-desc">Submit blind — correct or not.</span></span>
+          <span class="diff-check"></span>
+        </button>
+      </div>
+      <div class="sec-lbl">Anchor Actor</div>
+      <div class="srch-wrap" id="circleAnchorWrap">
+        <input class="srch-inp" id="circleAnchorInp" placeholder="Search actor or actress…" oninput="srchCircleAnchor(this.value)" autocomplete="off">
+        <div class="sug-list" id="circleAnchorSug"></div>
+      </div>
+      <div class="err-msg" id="circleSetupErr"></div>
+      <button class="rand-btn" id="circleRandBtn" onclick="randomizeCircleAnchor()" style="margin-top:12px;margin-bottom:12px">🎲 RANDOM ANCHOR</button>
+      <button class="gold-btn dim" id="circlePlayBtn" onclick="startCircleGame()">🔄 START CIRCLE</button>
+    </div>
+    <div class="home-card">
+      <div class="htp-title" style="color:#C084FC">🔄 How It Works</div>
+      <div class="htp-step"><span class="htp-num" style="background:#C084FC">1</span><span>You're given <strong>1 anchor actor</strong> to start and end with.</span></div>
+      <div class="htp-step"><span class="htp-num" style="background:#C084FC">2</span><span>Find <strong>5 more actors</strong> and a <strong>movie</strong> connecting each one to the next.</span></div>
+      <div class="htp-step"><span class="htp-num" style="background:#C084FC">3</span><span>The last actor must connect back to the <strong>anchor via a movie</strong> to close the circle!</span></div>
+      <div class="htp-step"><span class="htp-num" style="background:#C084FC">4</span><span>No actor or movie can be used twice.</span></div>
+    </div>
   </div>
 </div>
 
@@ -697,6 +765,7 @@ const G = {
   step: 1, phase: 'actor',
   pendingActor: null, pendingTitles: [],
   mhActors: {}, mhTitles: {}, mhErrors: [],
+  isCircleMode: false, circleActor: null, circActs: {}, circMovs: {}, circErrors: [],
   srchTmr: {}, gameTs: 0, wrongCount: 0,
   timerIv: null, timerSec: 90, clockIv: null,
   isDailyGame: false, dailyDate: null,
@@ -1106,6 +1175,7 @@ document.getElementById('howModal').addEventListener('click', e=>{if(e.target.id
 async function playPuzzle(dateStr) {
   let puzzle = G.dailyPuzzle && G.dailyPuzzle.puzzle_date === dateStr ? G.dailyPuzzle : await getDailyPuzzle(dateStr);
   if (!puzzle) { alert('Could not load puzzle for that date.'); return; }
+  G.isCircleMode = false;
   G.isDailyGame = true;
   G.dailyDate = dateStr;
   G.startActor = { id: puzzle.start_actor_id, name: puzzle.start_actor_name, profile_path: puzzle.start_actor_img };
@@ -1238,6 +1308,7 @@ function renderHdrChain() {
 }
 
 function startGame() {
+  G.isCircleMode = false;
   killTimer();
   G.chain = new Array(G.chainLen).fill(null).map(()=>({actor:null,title:null}));
   G.usedActors = new Set([G.startActor.id, G.endActor.id]);
@@ -1251,6 +1322,8 @@ function startGame() {
   const dp = document.getElementById('dPill');
   dp.textContent = {easy:'🟢 EASY',med:'🟡 MEDIUM',hard:'🔴 HARD'}[G.diff];
   dp.className = `dpill ${G.diff}`;
+  const hintsBtn = document.getElementById('hintsBtn');
+  if (hintsBtn) hintsBtn.style.display = '';
   renderHdrChain();
   const fsb = document.getElementById('fixedSubmitBar');
   if (fsb) fsb.style.display = 'block';
@@ -1578,6 +1651,11 @@ function flashSlot(id){const el=document.getElementById(id);if(!el)return;el.cla
 async function showWin() {
   clearWip();
   killClock();
+  // Reset win screen to chain defaults (circle mode sets its own)
+  const winTitle = document.querySelector('#win .win-title');
+  const winEmoji = document.querySelector('#win .win-emoji');
+  if (winTitle) winTitle.textContent = 'CHAIN COMPLETE!';
+  if (winEmoji) winEmoji.textContent = '🏆';
   const N=G.chainLen, moves=N-2;
   const elapsed=Math.round((Date.now()-G.gameTs)/1000);
   G.winElapsed = elapsed; // freeze time at win moment for accurate sharing
@@ -1653,21 +1731,26 @@ async function showWin() {
 }
 
 function shareResult() {
-  const N = G.chainLen;
   const elapsed = G.winElapsed ?? Math.round((Date.now() - G.gameTs) / 1000);
   const diffEmoji = {easy:'🟢',med:'🟡',hard:'🔴'}[G.diff];
-  const epoch = new Date('2026-03-10T12:00:00');
-  const puzzleDay = G.dailyDate ? new Date(G.dailyDate + 'T12:00:00') : null;
-  const puzzleNum = puzzleDay ? Math.round((puzzleDay - epoch) / 86400000) + 1 : null;
-  const header = G.isDailyGame && puzzleNum
-    ? `Actorly #${puzzleNum} ⭐`
-    : `Actorly ⭐`;
-  const startName = G.chain[0]?.actor?.name ?? '';
-  const endName = G.chain[N-1]?.actor?.name ?? '';
-  const middleEmojis = G.chain.slice(1, N-1).map(() => '🎬').join(' → ');
-  const chainLine = `${diffEmoji} ${startName} → ${middleEmojis} → ${endName} ${diffEmoji}`;
   const wrongStr = `${G.wrongCount} wrong`;
-  const text = `${header}\n${chainLine}\n⏱ ${fmt(elapsed)} · ${wrongStr}\nactorly.org`;
+  let text;
+  if (G.isCircleMode) {
+    const anchorName = G.circleActor?.name ?? '';
+    const middleEmojis = Array(5).fill('🎬').join(' → ');
+    text = `Actorly 🔄\n${diffEmoji} ${anchorName} → ${middleEmojis} → ${anchorName} ${diffEmoji}\n⏱ ${fmt(elapsed)} · ${wrongStr}\nactorly.org`;
+  } else {
+    const N = G.chainLen;
+    const epoch = new Date('2026-03-10T12:00:00');
+    const puzzleDay = G.dailyDate ? new Date(G.dailyDate + 'T12:00:00') : null;
+    const puzzleNum = puzzleDay ? Math.round((puzzleDay - epoch) / 86400000) + 1 : null;
+    const header = G.isDailyGame && puzzleNum ? `Actorly #${puzzleNum} ⭐` : `Actorly ⭐`;
+    const startName = G.chain[0]?.actor?.name ?? '';
+    const endName = G.chain[N-1]?.actor?.name ?? '';
+    const middleEmojis = G.chain.slice(1, N-1).map(() => '🎬').join(' → ');
+    const chainLine = `${diffEmoji} ${startName} → ${middleEmojis} → ${endName} ${diffEmoji}`;
+    text = `${header}\n${chainLine}\n⏱ ${fmt(elapsed)} · ${wrongStr}\nactorly.org`;
+  }
 
   if (navigator.share) {
     // Mobile: native share sheet (iMessage, Messages, etc.)
@@ -1823,7 +1906,8 @@ async function renderSocialStats(date, myMovies) {
 }
 
 function retryGame() {
-  if (G.isDailyGame) { playPuzzle(G.dailyDate || todayStr()); }
+  if (G.isCircleMode) { startCircleGame(); }
+  else if (G.isDailyGame) { playPuzzle(G.dailyDate || todayStr()); }
   else { startGame(); }
 }
 
@@ -1831,6 +1915,344 @@ function confirmQuit() {
   killTimer();
   if (confirm('Quit this game?')) { clearWip(); goScreen('home'); }
   else { startStepTimer(); }
+}
+
+// ── CIRCLE MODE ─────────────────────────────────────────────────────────────
+function goCircleSetup() {
+  G.circleActor = null;
+  G.circActs = {}; G.circMovs = {}; G.circErrors = [];
+  const wrap = document.getElementById('circleAnchorWrap');
+  if (wrap) wrap.innerHTML = `<input class="srch-inp" id="circleAnchorInp" placeholder="Search actor or actress…" oninput="srchCircleAnchor(this.value)" autocomplete="off"><div class="sug-list" id="circleAnchorSug"></div>`;
+  document.getElementById('circlePlayBtn').classList.add('dim');
+  document.getElementById('circleSetupErr').textContent = '';
+  setCircleDiff('easy');
+  goScreen('circlesetup');
+}
+
+function setCircleDiff(d) {
+  G.diff = d;
+  ['easy','med','hard'].forEach(x => {
+    const el = document.getElementById('circleDc' + x[0].toUpperCase() + x.slice(1));
+    if (!el) return;
+    el.className = 'diff-card' + (x === d ? ` sel-${x}` : '');
+    el.querySelector('.diff-check').textContent = x === d ? '✓' : '';
+  });
+}
+
+async function srchCircleAnchor(q) {
+  clearTimeout(G.srchTmr['circAnch']);
+  const el = document.getElementById('circleAnchorSug');
+  if (!q || q.length < 2) { el.innerHTML = ''; return; }
+  el.innerHTML = `<div class="sug-item"><div class="loading-dots"><span></span><span></span><span></span></div></div>`;
+  G.srchTmr['circAnch'] = setTimeout(async () => {
+    try {
+      const res = await findActors(q);
+      el.innerHTML = res.length ? res.map(a =>
+        `<div class="sug-item" onclick='selCircleAnchor(${JSON.stringify(a).replace(/'/g,"&#39;")})'>${a.profile_path?`<img class="sug-ph" src="${IMG(a.profile_path)}" onerror="actorFallback(this,'sug-ph')"/>`:`<div class="sug-ph" style="display:flex;align-items:center;justify-content:center;font-size:17px">👤</div>`}<div><div class="sug-nm">${esc(a.name)}</div><div class="sug-kn">${a.known_for_department||'Acting'}</div></div></div>`
+      ).join('') : `<div class="sug-item" style="color:var(--muted)">No results</div>`;
+    } catch(e) { el.innerHTML = `<div class="sug-item" style="color:var(--red)">Search error</div>`; }
+  }, 380);
+}
+
+function selCircleAnchor(a) {
+  if (typeof a === 'string') a = JSON.parse(a);
+  G.circleActor = a;
+  const w = document.getElementById('circleAnchorWrap');
+  const ph = a.profile_path ? IMG(a.profile_path, 'w92') : null;
+  w.innerHTML = `<div class="sel-actor">${ph?`<img class="sel-ph" src="${ph}"/>`:`<div class="sel-ph" style="display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--surf2)">👤</div>`}<div><div class="sel-nm">${esc(a.name)}</div><div class="sel-kn">${a.known_for_department||'Acting'}</div></div><button class="chg-btn" onclick="clearCircleAnchor()">Change</button></div>`;
+  document.getElementById('circlePlayBtn').classList.remove('dim');
+}
+
+function clearCircleAnchor() {
+  G.circleActor = null;
+  document.getElementById('circleAnchorWrap').innerHTML = `<input class="srch-inp" id="circleAnchorInp" placeholder="Search actor or actress…" oninput="srchCircleAnchor(this.value)" autocomplete="off"><div class="sug-list" id="circleAnchorSug"></div>`;
+  document.getElementById('circlePlayBtn').classList.add('dim');
+}
+
+async function randomizeCircleAnchor() {
+  const btn = document.getElementById('circleRandBtn');
+  btn.classList.add('loading'); btn.innerHTML = '🎲 Finding Actor…';
+  document.getElementById('circleSetupErr').textContent = '';
+  try {
+    const shuffled = [...POPULAR_ACTORS].sort(() => Math.random() - .5);
+    for (let i = 0; i < shuffled.length; i++) {
+      const res = await findActors(shuffled[i]);
+      if (res.length) { selCircleAnchor(res[0]); break; }
+    }
+  } catch(e) { document.getElementById('circleSetupErr').textContent = 'Error loading actors.'; }
+  btn.classList.remove('loading'); btn.innerHTML = '🎲 RANDOM ANCHOR';
+}
+
+function startCircleGame() {
+  if (!G.circleActor) return;
+  G.isCircleMode = true;
+  G.isDailyGame = false;
+  G.circActs = {}; G.circMovs = {}; G.circErrors = [];
+  G.usedActors = new Set([G.circleActor.id]);
+  G.usedTitles = new Set();
+  G.gameTs = Date.now(); G.wrongCount = 0;
+  G.startActor = G.circleActor; G.endActor = G.circleActor;
+  killTimer();
+  const dp = document.getElementById('dPill');
+  dp.textContent = {easy:'🟢 EASY',med:'🟡 MEDIUM',hard:'🔴 HARD'}[G.diff];
+  dp.className = `dpill ${G.diff}`;
+  const hintsBtn = document.getElementById('hintsBtn');
+  if (hintsBtn) hintsBtn.style.display = 'none';
+  const fsb = document.getElementById('fixedSubmitBar');
+  if (fsb) fsb.style.display = 'block';
+  goScreen('game');
+  renderCircleChain();
+  startLiveClock();
+}
+
+function renderCircleChain() {
+  const scroll = document.getElementById('chainScroll');
+  const anchor = G.circleActor;
+  let h = '';
+
+  // Anchor slot (position 0, locked)
+  const anchorPh = anchor?.profile_path ? IMG(anchor.profile_path, 'w92') : null;
+  h += `<div class="actor-slot is-circle-anchor" id="circSlot0"><div class="actor-filled">` +
+    `<span class="af-badge circle" style="flex-shrink:0">🔄 ANCHOR</span>` +
+    (anchorPh ? `<img class="af-av" src="${anchorPh}" onerror="actorFallback(this,'af-av')"/>` : `<div class="af-av" style="display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--surf3)">👤</div>`) +
+    `<div><div class="af-nm">${esc(anchor?.name||'')}</div><div class="af-sub" style="font-size:10px;color:#C084FC">Starting Point</div></div>` +
+    `</div></div>`;
+
+  // Actors 1-5 with connectors above each
+  for (let i = 1; i <= 5; i++) {
+    const actor = G.circActs[i] || null;
+    const connIdx = i - 1; // movie connecting slot (i-1) to slot i
+    const topActor = i === 1 ? anchor : (G.circActs[i - 1] || null);
+    const stagedTitle = G.circMovs[connIdx] || null;
+    const titleErr = G.circErrors.find(e => e.type === 'title' && e.idx === connIdx) || null;
+
+    if (stagedTitle) {
+      const pc = titleErr ? 'wrong-pill' : 'staged';
+      h += `<div class="connector"><div class="conn-line"></div>` +
+        `<div class="conn-row"><div class="conn-pill ${pc}" style="cursor:pointer" onclick="clearCircleTitle(${connIdx})" title="Tap to change">🎬 ${esc(stagedTitle.title||stagedTitle.name||'')}${titleErr?' ✕':''}</div></div>` +
+        `<div class="conn-line"></div></div>`;
+      if (titleErr) h += `<div style="padding:2px 14px 6px;font-size:12px;color:#ff8095;text-align:center;">${titleErr.msg}</div>`;
+    } else {
+      h += `<div class="connector"><div class="conn-line"></div></div>` +
+        `<div class="title-block" id="circTitleBlock${connIdx}">` +
+        (topActor && actor
+          ? `<div class="title-hint">🎬 Movie connecting <strong>${esc(topActor.name)}</strong> and <strong>${esc(actor.name)}</strong></div><div class="title-srch-wrap"><input class="title-inp" id="circTitleInp${connIdx}" placeholder="Search movie…" oninput="srchCircleTitle(${connIdx},this.value)" autocomplete="off"><div class="title-sug" id="circTitleSug${connIdx}"></div></div>`
+          : `<div class="title-hint" style="opacity:.4">🎬 Fill in actors above first</div>`)
+        + `</div><div class="connector"><div class="conn-line"></div></div>`;
+    }
+
+    // Actor slot i
+    const actorErr = G.circErrors.find(e => e.type === 'actor' && e.idx === i) || null;
+    if (actor) {
+      const ph = actor.profile_path ? IMG(actor.profile_path, 'w92') : null;
+      h += `<div class="actor-slot${actorErr?' is-wrong':''}" id="circSlot${i}">` +
+        `<span class="af-badge circle" style="flex-shrink:0">ACTOR ${i + 1}</span>` +
+        `<div class="actor-filled">` +
+        (ph ? `<img class="af-av" src="${ph}" onerror="actorFallback(this,'af-av')"/>` : `<div class="af-av" style="display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--surf3)">👤</div>`) +
+        `<div><div class="af-nm">${esc(actor.name)}</div>${actorErr?`<div style="font-size:11px;color:#ff8095;margin-top:1px">${actorErr.msg}</div>`:''}</div>` +
+        `</div><div class="slot-action-row"><button class="slot-edit-btn" onclick="clearCircleAct(${i})">✕ Change</button></div></div>`;
+    } else {
+      h += `<div class="actor-slot is-active${actorErr?' is-wrong':''}" id="circSlot${i}">` +
+        `<span class="af-badge circle">ACTOR ${i + 1}</span>` +
+        `<div class="actor-search"><div class="slot-label">👤 Search actor ${i + 1} of 6</div>` +
+        `<div class="inline-srch-wrap"><input class="inline-inp" id="circActInp${i}" placeholder="Search actor…" oninput="srchCircleAct(${i},this.value)" autocomplete="off"><div class="inline-sug" id="circActSug${i}"></div></div>` +
+        `</div></div>`;
+    }
+  }
+
+  // Closing connector: actor 6 → anchor
+  const lastActor = G.circActs[5] || null;
+  const closingTitle = G.circMovs[5] || null;
+  const closingErr = G.circErrors.find(e => e.type === 'title' && e.idx === 5) || null;
+  if (closingTitle) {
+    const pc = closingErr ? 'wrong-pill' : 'staged';
+    h += `<div class="connector"><div class="conn-line"></div>` +
+      `<div class="conn-row"><div class="conn-pill ${pc}" style="cursor:pointer" onclick="clearCircleTitle(5)" title="Tap to change">🎬 ${esc(closingTitle.title||closingTitle.name||'')}${closingErr?' ✕':''}</div></div>` +
+      `<div class="conn-line"></div></div>`;
+    if (closingErr) h += `<div style="padding:2px 14px 6px;font-size:12px;color:#ff8095;text-align:center;">${closingErr.msg}</div>`;
+  } else {
+    h += `<div class="connector"><div class="conn-line"></div></div>` +
+      `<div class="title-block" id="circTitleBlock5">` +
+      (lastActor
+        ? `<div class="title-hint">🎬 Movie connecting <strong>${esc(lastActor.name)}</strong> back to <strong>${esc(anchor.name)}</strong></div><div class="title-srch-wrap"><input class="title-inp" id="circTitleInp5" placeholder="Search movie…" oninput="srchCircleTitle(5,this.value)" autocomplete="off"><div class="title-sug" id="circTitleSug5"></div></div>`
+        : `<div class="title-hint" style="opacity:.4">🎬 Fill in all actors first</div>`)
+      + `</div><div class="connector"><div class="conn-line"></div></div>`;
+  }
+
+  h += `<div class="circle-return-banner">🔄 Connects back to <strong>${esc(anchor.name)}</strong> — close the circle!</div>`;
+
+  // Header bar
+  const bar = document.getElementById('hdrChainBar');
+  if (bar) {
+    let hdr = `<span style="font-size:11px;font-weight:700;color:#C084FC;white-space:nowrap;flex-shrink:0">🔄 ${esc(anchor.name)}</span>`;
+    for (let i = 1; i <= 5; i++) {
+      const isDone = !!G.circActs[i];
+      hdr += `<span class="hdr-dash">—</span><span class="hdr-step-dot ${isDone?'filled':''}" style="${isDone?'border-color:#C084FC;background:rgba(192,132,252,.2);color:#C084FC':''}">
+        ${isDone?'★':i}</span>`;
+    }
+    hdr += `<span class="hdr-dash">—</span><span style="font-size:11px;font-weight:700;color:#C084FC;white-space:nowrap;flex-shrink:0">↩</span>`;
+    bar.innerHTML = hdr;
+  }
+
+  // Steps badge
+  const filled = Object.keys(G.circActs).length;
+  document.getElementById('stepsBadge').textContent = `${filled} of 5 actors`;
+
+  // Submit button
+  const allActors = Array.from({length:5},(_,k)=>k+1).every(k=>!!G.circActs[k]);
+  const allMovies = Array.from({length:6},(_,k)=>k).every(k=>!!G.circMovs[k]);
+  const ready = allActors && allMovies;
+  const fsb = document.getElementById('fixedSubmitBar');
+  const fsBtn = document.getElementById('fixedSubmitBtn');
+  if (fsb && fsBtn) {
+    fsb.style.display = 'block';
+    const cls = G.diff==='hard'?'hard':G.diff==='med'?'med':'easy';
+    fsBtn.className = `submit-chain-btn ${cls}${ready?' ready':' dim'}`;
+    fsBtn.setAttribute('onclick', ready ? 'submitCircle()' : '');
+    fsBtn.innerHTML = ready ? '🔄 COMPLETE THE CIRCLE' : 'COMPLETE THE CIRCLE';
+  }
+
+  scroll.innerHTML = h;
+}
+
+function srchCircleAct(idx, q) {
+  clearTimeout(G.srchTmr[`ca${idx}`]);
+  const el = document.getElementById(`circActSug${idx}`);
+  if (!q || q.length < 2) { if(el) el.innerHTML=''; return; }
+  if (el) el.innerHTML = `<div class="sug-item"><div class="loading-dots"><span></span><span></span><span></span></div></div>`;
+  const usedIds = new Set([G.circleActor.id, ...Object.entries(G.circActs).filter(([k])=>parseInt(k)!==idx).map(([,a])=>a.id)]);
+  G.srchTmr[`ca${idx}`] = setTimeout(async () => {
+    try {
+      const res = await findActors(q);
+      const fil = res.filter(a=>!usedIds.has(a.id));
+      const sugEl = document.getElementById(`circActSug${idx}`);
+      if (sugEl) sugEl.innerHTML = fil.length ? fil.map(a=>`<div class="sug-item" onclick='pickCircleAct(${idx},${JSON.stringify(a).replace(/'/g,"&#39;")})'>${a.profile_path?`<img class="sug-ph" src="${IMG(a.profile_path)}" onerror="actorFallback(this,'sug-ph')"/>`:`<div class="sug-ph" style="display:flex;align-items:center;justify-content:center;font-size:17px">👤</div>`}<div><div class="sug-nm">${esc(a.name)}</div><div class="sug-kn">${a.known_for_department||'Acting'}</div></div></div>`).join(''):`<div class="sug-item" style="color:var(--muted)">No results</div>`;
+    } catch(e) { const sugEl=document.getElementById(`circActSug${idx}`); if(sugEl) sugEl.innerHTML=`<div class="sug-item" style="color:var(--red)">Search error</div>`; }
+  }, 380);
+}
+
+function pickCircleAct(idx, a) {
+  if (typeof a==='string') a=JSON.parse(a);
+  G.circErrors = G.circErrors.filter(e=>!(e.type==='actor'&&e.idx===idx));
+  G.circActs[idx] = a;
+  renderCircleChain();
+}
+
+function clearCircleAct(idx) {
+  delete G.circActs[idx];
+  G.circErrors = G.circErrors.filter(e=>!(e.type==='actor'&&e.idx===idx));
+  renderCircleChain();
+}
+
+function srchCircleTitle(connIdx, q) {
+  clearTimeout(G.srchTmr[`ct${connIdx}`]);
+  const el = document.getElementById(`circTitleSug${connIdx}`);
+  if (!q || q.length < 2) { if(el) el.innerHTML=''; return; }
+  if (el) el.innerHTML = `<div class="sug-item"><div class="loading-dots"><span></span><span></span><span></span></div></div>`;
+  G.srchTmr[`ct${connIdx}`] = setTimeout(async () => {
+    try {
+      const res = await searchTitles(q);
+      const usedIds = new Set(Object.entries(G.circMovs).filter(([k])=>parseInt(k)!==connIdx).map(([,t])=>t.id));
+      const fil = res.filter(t=>!usedIds.has(t.id));
+      const sugEl = document.getElementById(`circTitleSug${connIdx}`);
+      if (sugEl) sugEl.innerHTML = fil.length ? fil.map(t=>{const yr=t.release_date?.slice(0,4)||'';return`<div class="sug-item" onclick='pickCircleTitle(${connIdx},${JSON.stringify(t).replace(/'/g,"&#39;")})'><div class="sug-ph" style="display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--surf2)">🎬</div><div><div class="sug-nm">${esc(t.title)}</div><div class="sug-kn">${yr}</div></div></div>`;}).join(''):`<div class="sug-item" style="color:var(--muted)">No results</div>`;
+    } catch(e) { const sugEl=document.getElementById(`circTitleSug${connIdx}`); if(sugEl) sugEl.innerHTML=`<div class="sug-item" style="color:var(--red)">Search error</div>`; }
+  }, 380);
+}
+
+function pickCircleTitle(connIdx, t) {
+  if (typeof t==='string') t=JSON.parse(t);
+  G.circErrors = G.circErrors.filter(e=>!(e.type==='title'&&e.idx===connIdx));
+  G.circMovs[connIdx] = t;
+  renderCircleChain();
+}
+
+function clearCircleTitle(connIdx) {
+  delete G.circMovs[connIdx];
+  G.circErrors = G.circErrors.filter(e=>!(e.type==='title'&&e.idx===connIdx));
+  renderCircleChain();
+}
+
+async function submitCircle() {
+  const isHard = G.diff === 'hard';
+  G.circErrors = [];
+  const actors = [G.circleActor, G.circActs[1], G.circActs[2], G.circActs[3], G.circActs[4], G.circActs[5]];
+  // 6 connections including the wrap-back (5 → 0)
+  const conns = [
+    [actors[0],actors[1],G.circMovs[0]],
+    [actors[1],actors[2],G.circMovs[1]],
+    [actors[2],actors[3],G.circMovs[2]],
+    [actors[3],actors[4],G.circMovs[3]],
+    [actors[4],actors[5],G.circMovs[4]],
+    [actors[5],actors[0],G.circMovs[5]],
+  ];
+  const errors = [];
+  for (let i = 0; i < conns.length; i++) {
+    const [a1, a2, t] = conns[i];
+    if (!t) { errors.push({type:'title',idx:i,msg:'No movie selected'}); continue; }
+    if (!a1 || !a2) continue;
+    try {
+      const shared = await sharedTitles(a1.id, a2.id);
+      const match = shared.find(s=>s.id===t.id);
+      if (!match) errors.push({type:'title',idx:i,msg:isHard?'✗ Incorrect.':`✗ "${esc(t.title||t.name||'')}" doesn't connect ${esc(a1.name)} and ${esc(a2.name)}.`});
+    } catch(e) { errors.push({type:'title',idx:i,msg:'Error — try again.'}); }
+  }
+  if (!errors.length) {
+    killTimer(); killClock();
+    setTimeout(showCircleWin, 600);
+  } else {
+    G.wrongCount++; G.circErrors = errors; renderCircleChain();
+    setTimeout(()=>{
+      const fe = G.circErrors[0];
+      const el = document.getElementById(fe.type==='title'?'circTitleBlock'+fe.idx:'circSlot'+fe.idx);
+      if (el) el.scrollIntoView({behavior:'smooth',block:'center'});
+    }, 150);
+  }
+}
+
+function showCircleWin() {
+  killClock();
+  const elapsed = Math.round((Date.now() - G.gameTs) / 1000);
+  G.winElapsed = elapsed;
+  const diffLabel = {easy:'🟢 Easy',med:'🟡 Medium',hard:'🔴 Hard'}[G.diff];
+  const anchor = G.circleActor;
+  const actors = [anchor, G.circActs[1], G.circActs[2], G.circActs[3], G.circActs[4], G.circActs[5]];
+
+  document.getElementById('winStats').innerHTML =
+    `<div class="w-stat"><div class="w-sv">6</div><div class="w-sl">Actors</div></div>` +
+    `<div class="w-stat"><div class="w-sv">6</div><div class="w-sl">Movies</div></div>` +
+    `<div class="w-stat"><div class="w-sv">${fmt(elapsed)}</div><div class="w-sl">Time</div></div>` +
+    `<div class="w-stat"><div class="w-sv">${G.wrongCount}</div><div class="w-sl">Mistakes</div></div>`;
+
+  let ch = `<div class="wc-title">Your Circle · ${diffLabel}</div>`;
+  for (let i = 0; i < 6; i++) {
+    const a = actors[i];
+    const clr = i === 0 ? '#C084FC' : 'var(--gold)';
+    ch += `<div class="wc-step"><div class="wc-dot" style="background:${clr}"></div><strong>${esc(a?.name||'')}</strong>${i===0?' <span style="font-size:10px;color:#C084FC;font-weight:600">ANCHOR</span>':''}</div>`;
+    const mv = G.circMovs[i];
+    if (mv) ch += `<div class="wc-ttl">🎬 ${esc(mv.title||mv.name||'')}</div>`;
+  }
+  ch += `<div class="wc-step"><div class="wc-dot" style="background:#C084FC"></div><strong>${esc(anchor.name)}</strong> <span style="font-size:10px;color:#C084FC">↩ CIRCLE COMPLETE</span></div>`;
+
+  document.getElementById('winChain').innerHTML = ch;
+  document.getElementById('socialWrap').style.display = 'none';
+
+  const winTitle = document.querySelector('#win .win-title');
+  const winEmoji = document.querySelector('#win .win-emoji');
+  if (winTitle) winTitle.textContent = 'CIRCLE COMPLETE!';
+  if (winEmoji) winEmoji.textContent = '🔄';
+
+  const shareBtn = document.getElementById('shareBtn');
+  if (shareBtn) { shareBtn.classList.remove('copied'); shareBtn.innerHTML = 'Share 📤'; }
+  document.getElementById('streakMilestoneToast').classList.remove('show');
+
+  const retryBtn = document.getElementById('winRetryBtn');
+  const pastBtn = document.getElementById('winPastBtn');
+  retryBtn.style.display = 'block';
+  retryBtn.textContent = '↺ PLAY AGAIN';
+  pastBtn.style.display = 'none';
+
+  goScreen('win');
 }
 
 // ── BOOT ───────────────────────────────────────────────────────────────────
