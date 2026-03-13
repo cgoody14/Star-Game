@@ -39,7 +39,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--text);t
 @keyframes ldot{0%,80%,100%{opacity:.2}40%{opacity:1}}
 
 /* HOME */
-#home{overflow-y:auto;-webkit-overflow-scrolling:touch;align-items:center;justify-content:center;padding:24px 16px 44px;background:var(--dark);position:relative;gap:0}
+#home{overflow-y:auto;-webkit-overflow-scrolling:touch;align-items:center;justify-content:center;padding:12px 16px 44px;background:var(--dark);position:relative;gap:0}
 #home::before{content:'';position:absolute;width:520px;height:520px;background:radial-gradient(circle,rgba(91,127,255,.1) 0%,transparent 65%);top:-120px;right:-160px;pointer-events:none;z-index:0}
 #home::after{content:'';position:absolute;width:380px;height:380px;background:radial-gradient(circle,rgba(245,166,35,.07) 0%,transparent 65%);bottom:-60px;left:-80px;pointer-events:none;z-index:0}
 .logo-wrap{display:flex;flex-direction:column;align-items:center;margin-bottom:18px;position:relative;z-index:1}
@@ -50,7 +50,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--text);t
 .home-card{background:var(--surf);border-radius:24px;padding:20px 16px;width:100%;max-width:420px;position:relative;z-index:1;border:1px solid rgba(255,255,255,.07);box-shadow:0 8px 40px rgba(0,0,0,.3)}
 
 /* Mode cards */
-.mode-cards{display:flex;flex-direction:column;gap:12px;width:100%;max-width:420px;position:relative;z-index:1}
+.mode-cards{display:flex;flex-direction:column;gap:12px;width:100%;max-width:480px;margin:0 auto;position:relative;z-index:1}
 .mode-card{border-radius:22px;padding:22px 20px;cursor:pointer;border:1.5px solid transparent;transition:transform .15s,box-shadow .2s;display:flex;align-items:center;gap:16px;text-align:left;-webkit-appearance:none;background:none;width:100%}
 .mode-card:active{transform:scale(.98)}
 .mode-card.daily{background:linear-gradient(135deg,rgba(245,166,35,.18),rgba(255,209,102,.1));border-color:rgba(245,166,35,.35);box-shadow:0 8px 32px rgba(245,166,35,.15)}
@@ -279,20 +279,22 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
 /* SOCIAL comparison */
 .social-wrap{width:100%;max-width:400px;position:relative;z-index:1}
 .social-title{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;text-align:center}
-.social-card{background:var(--surf);border-radius:20px;padding:16px;border:1px solid rgba(255,255,255,.07);margin-bottom:12px}
-.social-hdr{font-size:11px;color:var(--muted);margin-bottom:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase}
-.social-movie-row{margin-bottom:10px}
-.social-movie-name{font-size:13px;font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:6px}
-.social-bar-wrap{position:relative;height:22px;background:var(--surf2);border-radius:11px;overflow:hidden}
-.social-bar-fill{height:100%;border-radius:11px;background:linear-gradient(90deg,rgba(37,99,235,.5),rgba(147,180,255,.4));transition:width 1s cubic-bezier(.4,0,.2,1)}
+.social-card{background:var(--surf);border-radius:16px;padding:10px 12px;border:1px solid rgba(255,255,255,.07);margin-bottom:8px}
+.social-hdr{font-size:10px;color:var(--muted);margin-bottom:8px;font-weight:600;letter-spacing:1px;text-transform:uppercase}
+.social-movie-row{margin-bottom:8px}
+.social-movie-name{font-size:12px;font-weight:600;margin-bottom:3px;display:flex;align-items:center;gap:6px}
+.social-bar-wrap{position:relative;height:14px;background:var(--surf2);border-radius:7px;overflow:hidden}
+.social-bar-fill{height:100%;border-radius:7px;background:linear-gradient(90deg,rgba(37,99,235,.5),rgba(147,180,255,.4));transition:width 1s cubic-bezier(.4,0,.2,1)}
 .social-bar-fill.is-yours{background:linear-gradient(90deg,rgba(245,166,35,.6),rgba(255,209,102,.5))}
-.social-bar-pct{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:10px;font-weight:700;color:var(--text)}
+.social-bar-pct{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:9px;font-weight:700;color:var(--text)}
 .social-yours-badge{font-size:9px;background:rgba(245,166,35,.2);color:var(--gold);border:1px solid rgba(245,166,35,.3);border-radius:20px;padding:1px 6px;letter-spacing:1px;text-transform:uppercase;font-weight:700}
-.social-count{font-size:11px;color:var(--muted);text-align:center;margin-top:8px}
+.social-count{font-size:10px;color:var(--muted);text-align:center;margin-top:6px}
 
 /* WIN BUTTONS */
 .win-btns{width:100%;max-width:400px;display:flex;flex-direction:column;gap:10px;position:relative;z-index:1}
-.share-btn{width:100%;min-height:52px;padding:14px;background:linear-gradient(135deg,#1d9bf0,#0d84d4);color:#fff;border:none;border-radius:50px;font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;cursor:pointer;transition:transform .15s,box-shadow .2s;box-shadow:0 4px 18px rgba(29,155,240,.4);-webkit-appearance:none;display:flex;align-items:center;justify-content:center;gap:8px}
+.win-action-row{display:flex;gap:10px}
+.win-action-row>*{flex:1;min-width:0;width:auto!important}
+.share-btn{width:100%;max-width:400px;min-height:52px;padding:14px;background:linear-gradient(135deg,#1d9bf0,#0d84d4);color:#fff;border:none;border-radius:50px;font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;cursor:pointer;transition:transform .15s,box-shadow .2s;box-shadow:0 4px 18px rgba(29,155,240,.4);-webkit-appearance:none;display:flex;align-items:center;justify-content:center;gap:8px;position:relative;z-index:5}
 .share-btn:active{transform:scale(.97)}
 /* Win desktop layout */
 .win-content-row{width:100%;max-width:400px;display:flex;flex-direction:column;gap:12px;position:relative;z-index:1}
@@ -300,8 +302,16 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
   #win{padding:20px 32px 44px}
   .win-content-row{max-width:820px;flex-direction:row;align-items:flex-start}
   .win-content-row .win-chain-wrap,.win-content-row .social-wrap{flex:1;max-width:none}
-  .win-stats,.win-section-label,.win-btns{max-width:820px}
+  .win-stats,.win-section-label,.win-btns,.share-btn{max-width:820px}
 }
+@media(max-width:767px){
+  .share-btn{position:sticky;bottom:16px;z-index:10}
+}
+/* Streak display on home */
+.streak-display{text-align:center;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--gold);position:relative;z-index:1;margin:8px 0}
+/* Streak milestone toast on win screen */
+.streak-milestone-toast{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--gold);text-align:center;opacity:0;max-height:0;overflow:hidden;position:relative;z-index:2;transition:opacity .5s,max-height .3s}
+.streak-milestone-toast.show{opacity:1;max-height:60px;margin-bottom:8px}
 /* Copied toast */
 .copied-toast{position:fixed;bottom:40px;left:50%;transform:translateX(-50%) translateY(8px);background:rgba(30,30,30,.95);color:#fff;padding:10px 22px;border-radius:30px;font-size:14px;font-weight:600;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.4)}
 .copied-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -429,7 +439,9 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
     </button>
   </div>
 
-  <div style="display:flex;gap:10px;margin-top:16px;position:relative;z-index:1;width:100%;max-width:420px">
+  <div class="streak-display" id="homeStreak" style="display:none"></div>
+
+  <div style="display:flex;gap:10px;margin-top:16px;position:relative;z-index:1;width:100%;max-width:480px">
     <button class="home-meta-btn" onclick="openHow()">❓ How to Play</button>
     <button class="home-meta-btn gold" onclick="goScreen('stats')">📊 My Stats</button>
   </div>
@@ -456,13 +468,7 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
     </div>
 
     <div class="home-card">
-      <div class="daily-hard-notice">
-        <span class="diff-icon">🔴</span>
-        <div>
-          <div style="font-size:14px;font-weight:700;color:var(--hard-c);margin-bottom:2px">HARD MODE</div>
-          <div style="font-size:12px;color:var(--muted);line-height:1.4">Fill the whole chain blind — you won't know what's wrong until you submit.</div>
-        </div>
-      </div>
+      <div style="text-align:center;font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.5">Fill the chain blind. Submit when ready.</div>
       <div class="how-to-play-card">
         <div class="htp-title">📖 How To Play</div>
         <div class="htp-step"><span class="htp-num">1</span><span>You'll be given a <strong>Start Actor</strong> and an <strong>End Actor</strong>.</span></div>
@@ -572,8 +578,10 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
 
 <!-- WIN -->
 <div class="screen" id="win">
+  <div class="streak-milestone-toast" id="streakMilestoneToast"></div>
   <div class="win-emoji">🏆</div>
   <div class="win-title">CHAIN COMPLETE!</div>
+  <button class="share-btn" id="shareBtn" onclick="shareResult()">Share 📤</button>
   <div class="win-section-label">STATISTICS</div>
   <div class="win-stats" id="winStats"></div>
   <div class="win-content-row">
@@ -586,10 +594,11 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
   </div>
 
   <div class="win-btns">
-    <button class="share-btn" id="shareBtn" onclick="shareResult()">Share 📤</button>
-    <button class="gold-btn" onclick="goScreen('home')">🏠 HOME</button>
-    <button class="outline-btn" id="winRetryBtn" onclick="retryGame()">↺ PLAY AGAIN</button>
-    <button class="outline-btn" id="winPastBtn" onclick="goScreen('past')" style="display:none">🗓 PAST PUZZLES</button>
+    <div class="win-action-row">
+      <button class="gold-btn" onclick="goScreen('home')">🏠 HOME</button>
+      <button class="outline-btn" id="winRetryBtn" onclick="retryGame()">↺ PLAY AGAIN</button>
+      <button class="outline-btn" id="winPastBtn" onclick="goScreen('past')" style="display:none">🗓 PAST PUZZLES</button>
+    </div>
   </div>
 </div>
 
@@ -796,14 +805,9 @@ async function loadStatsScreen() {
     const byDiff = {easy:0, med:0, hard:0};
     data.forEach(d => { if (byDiff[d.difficulty] !== undefined) byDiff[d.difficulty]++; });
     const dailyDates = [...new Set(data.filter(d=>d.puzzle_date).map(d=>d.puzzle_date))].sort().reverse();
-    let streak = 0;
     const today = new Date(); today.setHours(0,0,0,0);
-    for (let i = 0; i < dailyDates.length; i++) {
-      const d = new Date(dailyDates[i] + 'T12:00:00');
-      const diff = Math.round((today - d) / 86400000);
-      if (diff === i || diff === i + 1) streak++;
-      else break;
-    }
+    const currentStreak = calcLocalStreak();
+    const longestStreak = calcLongestStreak();
     const last14 = [];
     for (let i = 13; i >= 0; i--) {
       const d = new Date(today); d.setDate(d.getDate() - i);
@@ -812,11 +816,11 @@ async function loadStatsScreen() {
     }
     el.innerHTML = `
       <div class="stat-grid">
-        <div class="stat-card gold"><div class="stat-val">${total}</div><div class="stat-lbl">Games Played</div></div>
-        <div class="stat-card green"><div class="stat-val">${streak}</div><div class="stat-lbl">Day Streak 🔥</div></div>
+        <div class="stat-card green"><div class="stat-val">${currentStreak}</div><div class="stat-lbl">🔥 Current Streak</div></div>
+        <div class="stat-card gold"><div class="stat-val">${longestStreak}</div><div class="stat-lbl">🏆 Longest Streak</div></div>
+        <div class="stat-card"><div class="stat-val">${total}</div><div class="stat-lbl">Games Played</div></div>
         <div class="stat-card"><div class="stat-val">${bestTime ? fmt(bestTime) : '—'}</div><div class="stat-lbl">Best Time</div></div>
         <div class="stat-card blue"><div class="stat-val">${avgTime ? fmt(avgTime) : '—'}</div><div class="stat-lbl">Avg Time</div></div>
-        <div class="stat-card"><div class="stat-val">${dailyDates.length}</div><div class="stat-lbl">Daily Puzzles</div></div>
         <div class="stat-card"><div class="stat-val">${avgWrong}</div><div class="stat-lbl">Avg Attempts</div></div>
       </div>
       <div class="stat-sec-title">🗓 Last 14 Days</div>
@@ -849,6 +853,7 @@ async function init() {
   } catch(e) {
     console.warn('Daily banner load failed or timed out:', e);
   }
+  renderHomeStreak();
   goScreen('home');
   document.getElementById('loadingOv').classList.add('hidden');
 }
@@ -1490,15 +1495,20 @@ async function showWin() {
     ch+=`<div class="wc-step"><div class="wc-dot" style="background:${dc}"></div><strong>${esc(actor.name)}</strong></div>`;
     if(slot.title)ch+=`<div class="wc-ttl">🎬 ${esc(slot.title.title||slot.title.name||'')}</div>`;
   }
-  document.getElementById('winChain').innerHTML=`<div class="wc-title">Your Chain • ${diffLabel}</div>${ch}`;
+  const chainTitle = G.isDailyGame
+    ? `<div class="wc-title">Your Chain · <span style="color:var(--hard-c);font-weight:700">🔴 HARD MODE</span></div>`
+    : `<div class="wc-title">Your Chain · ${diffLabel}</div>`;
+  document.getElementById('winChain').innerHTML=`${chainTitle}${ch}`;
   document.getElementById('socialWrap').style.display='none';
 
-  // Reset share button
+  // Reset share button and streak milestone toast
   const shareBtn = document.getElementById('shareBtn');
   if (shareBtn) {
     shareBtn.classList.remove('copied');
     shareBtn.innerHTML = 'Share 📤';
   }
+  const milestoneToast = document.getElementById('streakMilestoneToast');
+  if (milestoneToast) milestoneToast.classList.remove('show');
 
   const retryBtn = document.getElementById('winRetryBtn');
   const pastBtn = document.getElementById('winPastBtn');
@@ -1522,6 +1532,8 @@ async function showWin() {
         chain: G.chain, chainLen: G.chainLen, diff: G.diff,
         wrongCount: G.wrongCount, elapsed: elapsed, dailyDate: G.dailyDate
       }));
+      const currentStreak = calcLocalStreak();
+      showStreakMilestoneToast(currentStreak);
       try {
         await submitToDB({
           puzzle_date: G.dailyDate,
@@ -1607,6 +1619,64 @@ function startDailyCountdown() {
   }
   tick();
   window._cdTimer = setInterval(tick, 1000);
+}
+
+// ── STREAK HELPERS ─────────────────────────────────────────────────────────
+function calcLocalStreak() {
+  let streak = 0;
+  for (let i = 0; i < 365; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const ds = d.toISOString().split('T')[0];
+    if (['easy','med','hard'].some(diff => localStorage.getItem(`sc_done_${ds}_${diff}`))) {
+      streak++;
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
+
+function calcLongestStreak() {
+  const dates = new Set();
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    const m = key && key.match(/^sc_done_(\d{4}-\d{2}-\d{2})_/);
+    if (m) dates.add(m[1]);
+  }
+  if (!dates.size) return 0;
+  const sorted = [...dates].sort();
+  let longest = 1, cur = 1;
+  for (let i = 1; i < sorted.length; i++) {
+    const prev = new Date(sorted[i-1] + 'T12:00:00');
+    const curr = new Date(sorted[i] + 'T12:00:00');
+    const diff = Math.round((curr - prev) / 86400000);
+    if (diff === 1) { cur++; longest = Math.max(longest, cur); }
+    else cur = 1;
+  }
+  return longest;
+}
+
+function renderHomeStreak() {
+  const streak = calcLocalStreak();
+  const el = document.getElementById('homeStreak');
+  if (!el) return;
+  if (streak >= 1) {
+    el.textContent = `🔥 ${streak} day streak`;
+    el.style.display = 'block';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+function showStreakMilestoneToast(streak) {
+  const milestones = [3, 7, 14, 30];
+  if (!milestones.includes(streak)) return;
+  const el = document.getElementById('streakMilestoneToast');
+  if (!el) return;
+  el.textContent = `🔥 ${streak} Day Streak!`;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
 }
 
 async function renderSocialStats(date, myMovies) {
