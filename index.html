@@ -1546,14 +1546,14 @@ function shareResult() {
   const puzzleDay = G.dailyDate ? new Date(G.dailyDate + 'T12:00:00') : null;
   const puzzleNum = puzzleDay ? Math.round((puzzleDay - epoch) / 86400000) + 1 : null;
   const header = G.isDailyGame && puzzleNum
-    ? `Actorly #${puzzleNum} ${diffEmoji}`
-    : `Actorly ${diffEmoji}`;
-  const chainEmoji = G.chain.map((s, i) => {
-    if (i === 0 || i === N-1) return '⭐';
-    return '🎬';
-  }).join(' → ');
-  const wrongStr = G.wrongCount === 0 ? 'No wrong attempts' : `❌ ${G.wrongCount} wrong attempt${G.wrongCount===1?'':'s'}`;
-  const text = `${header}\n${chainEmoji}\n⏱ ${fmt(elapsed)}\n${wrongStr}\nhttps://actorly.org`;
+    ? `Actorly #${puzzleNum} ⭐`
+    : `Actorly ⭐`;
+  const startName = G.chain[0]?.name ?? G.chain[0];
+  const endName = G.chain[N-1]?.name ?? G.chain[N-1];
+  const middleEmojis = G.chain.slice(1, N-1).map(() => '🎬').join(' → ');
+  const chainLine = `${diffEmoji} ${startName} → ${middleEmojis} → ${endName} ${diffEmoji}`;
+  const wrongStr = `${G.wrongCount} wrong`;
+  const text = `${header}\n${chainLine}\n⏱ ${fmt(elapsed)} · ${wrongStr}\nactorly.org`;
 
   if (navigator.share) {
     // Mobile: native share sheet (iMessage, Messages, etc.)
