@@ -869,9 +869,16 @@ async function getCredits(id) {
   return (d.cast||[]).filter(c => c.media_type==='movie');
 }
 async function sharedTitles(id1, id2) {
-  const [c1,c2] = await Promise.all([getCredits(id1), getCredits(id2)]);
-  const m = new Map(c1.map(x=>[x.id,x]));
-  return c2.filter(x=>m.has(x.id)).map(x=>({...x, title:x.title||x.name})).sort((a,b)=>(b.vote_count||0)-(a.vote_count||0));
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const [c1,c2] = await Promise.all([getCredits(id1), getCredits(id2)]);
+      const m = new Map(c1.map(x=>[x.id,x]));
+      return c2.filter(x=>m.has(x.id)).map(x=>({...x, title:x.title||x.name})).sort((a,b)=>(b.vote_count||0)-(a.vote_count||0));
+    } catch(e) {
+      if (attempt === 2) throw e;
+      await new Promise(r => setTimeout(r, 600 * (attempt + 1)));
+    }
+  }
 }
 async function getDirector(movieId) {
   if (G.directorCache[movieId]) return G.directorCache[movieId];
