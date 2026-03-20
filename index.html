@@ -766,7 +766,7 @@ const G = {
   pendingActor: null, pendingTitles: [],
   mhActors: {}, mhTitles: {}, mhErrors: [],
   isCircleMode: false, circleActor: null, circActs: {}, circMovs: {}, circErrors: [],
-  srchTmr: {}, gameTs: 0, wrongCount: 0,
+  srchTmr: {}, gameTs: 0, wrongCount: 0, directorCache: {},
   timerIv: null, timerSec: 90, clockIv: null,
   isDailyGame: false, dailyDate: null,
   dailyPuzzle: null,
@@ -866,12 +866,24 @@ async function findActors(q) {
 }
 async function getCredits(id) {
   const d = await tmdb(`/person/${id}/combined_credits`);
-  return (d.cast||[]).filter(c => c.media_type==='movie' && c.vote_count>5);
+  return (d.cast||[]).filter(c => c.media_type==='movie');
 }
 async function sharedTitles(id1, id2) {
   const [c1,c2] = await Promise.all([getCredits(id1), getCredits(id2)]);
   const m = new Map(c1.map(x=>[x.id,x]));
   return c2.filter(x=>m.has(x.id)).map(x=>({...x, title:x.title||x.name})).sort((a,b)=>(b.vote_count||0)-(a.vote_count||0));
+}
+async function getDirector(movieId) {
+  if (G.directorCache[movieId]) return G.directorCache[movieId];
+  try {
+    const d = await tmdb(`/movie/${movieId}/credits`);
+    const director = (d.crew||[]).find(c => c.job === 'Director');
+    const name = director ? director.name : null;
+    G.directorCache[movieId] = name;
+    return name;
+  } catch(e) {
+    return null;
+  }
 }
 async function searchTitles(q) {
   if (!q || q.length < 2) return [];
@@ -1554,8 +1566,8 @@ function renderChain() {
 function srchActorMH(idx,q){clearTimeout(G.srchTmr[`a${idx}`]);const el=document.getElementById(`actorSug${idx}`);if(!q||q.length<2){if(el)el.innerHTML='';return;}if(el)el.innerHTML=`<div class="sug-item"><div class="loading-dots"><span></span><span></span><span></span></div></div>`;const usedIds=new Set([G.startActor.id,G.endActor.id,...Object.entries(G.mhActors).filter(([k])=>parseInt(k)!==idx).map(([,a])=>a.id)]);G.srchTmr[`a${idx}`]=setTimeout(async()=>{try{const res=await findActors(q);const fil=res.filter(a=>!usedIds.has(a.id));const sugEl=document.getElementById(`actorSug${idx}`);if(sugEl)sugEl.innerHTML=fil.length?fil.map(a=>`<div class="sug-item" onclick='pickActorMH(${idx},${JSON.stringify(a).replace(/'/g,"&#39;")})'>${a.profile_path?`<img class="sug-ph" src="${IMG(a.profile_path)}" onerror="actorFallback(this,'sug-ph')"/>`:`<div class="sug-ph" style="display:flex;align-items:center;justify-content:center;font-size:17px">👤</div>`}<div><div class="sug-nm">${esc(a.name)}</div><div class="sug-kn">${a.known_for_department||'Acting'}</div></div></div>`).join(''):`<div class="sug-item" style="color:var(--muted)">No results</div>`;}catch(e){const sugEl=document.getElementById(`actorSug${idx}`);if(sugEl)sugEl.innerHTML=`<div class="sug-item" style="color:var(--red)">Search error</div>`;}},380);}
 function pickActorMH(idx,a){if(typeof a==='string')a=JSON.parse(a);G.mhErrors=G.mhErrors.filter(e=>!(e.type==='actor'&&e.idx===idx));G.mhActors[idx]=a;renderChain();}
 function clearMhActor(idx){delete G.mhActors[idx];G.mhErrors=G.mhErrors.filter(e=>!(e.type==='actor'&&e.idx===idx));renderChain();}
-function srchTitleMH(connIdx,q){clearTimeout(G.srchTmr[`t${connIdx}`]);const el=document.getElementById(`titleSug${connIdx}`);if(!q||q.length<2){if(el)el.innerHTML='';return;}if(el)el.innerHTML=`<div class="sug-item"><div class="loading-dots"><span></span><span></span><span></span></div></div>`;G.srchTmr[`t${connIdx}`]=setTimeout(async()=>{try{const res=await searchTitles(q);const sugEl=document.getElementById(`titleSug${connIdx}`);if(sugEl)sugEl.innerHTML=res.length?res.map(t=>{const yr=t.release_date?.slice(0,4)||'';return`<div class="sug-item" onclick='pickTitleMH(${connIdx},${JSON.stringify(t).replace(/'/g,"&#39;")})'><div class="sug-ph" style="display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--surf2)">🎬</div><div><div class="sug-nm">${esc(t.title)}</div><div class="sug-kn">${yr}</div></div></div>`;}).join(''):`<div class="sug-item" style="color:var(--muted)">No results</div>`;}catch(e){const sugEl=document.getElementById(`titleSug${connIdx}`);if(sugEl)sugEl.innerHTML=`<div class="sug-item" style="color:var(--red)">Search error</div>`;}},380);}
-function pickTitleMH(connIdx,t){if(typeof t==='string')t=JSON.parse(t);G.mhErrors=G.mhErrors.filter(e=>!(e.type==='title'&&e.idx===connIdx));G.mhTitles[connIdx]=t;renderChain();}
+function srchTitleMH(connIdx,q){clearTimeout(G.srchTmr[`t${connIdx}`]);const el=document.getElementById(`titleSug${connIdx}`);if(!q||q.length<2){if(el)el.innerHTML='';return;}if(el)el.innerHTML=`<div class="sug-item"><div class="loading-dots"><span></span><span></span><span></span></div></div>`;G.srchTmr[`t${connIdx}`]=setTimeout(async()=>{try{const res=await searchTitles(q);const sugEl=document.getElementById(`titleSug${connIdx}`);if(res.length){const itemsWithDirectors=await Promise.all(res.map(async t=>{const yr=t.release_date?.slice(0,4)||'';const dir=await getDirector(t.id);const sub=[yr,dir?`Dir. ${dir}`:null].filter(Boolean).join(' · ');return`<div class="sug-item" onclick='pickTitleMH(${connIdx},${JSON.stringify(t).replace(/'/g,"&#39;")})'><div class="sug-ph" style="display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--surf2)">🎬</div><div><div class="sug-nm">${esc(t.title)}</div><div class="sug-kn">${sub}</div></div></div>`;}));if(sugEl)sugEl.innerHTML=itemsWithDirectors.join('');}else{if(sugEl)sugEl.innerHTML=`<div class="sug-item" style="color:var(--muted)">No results</div>`;}  }catch(e){const sugEl=document.getElementById(`titleSug${connIdx}`);if(sugEl)sugEl.innerHTML=`<div class="sug-item" style="color:var(--red)">Search error</div>`;}},380);}
+function pickTitleMH(connIdx,t){if(typeof t==='string')t=JSON.parse(t);G.mhErrors=G.mhErrors.filter(e=>!(e.type==='title'&&e.idx===connIdx));G.mhTitles[connIdx]=t;getDirector(t.id).then(dir=>{if(dir)t.director=dir;});renderChain();}
 function clearMhTitle(connIdx){delete G.mhTitles[connIdx];G.mhErrors=G.mhErrors.filter(e=>!(e.type==='title'&&e.idx===connIdx));renderChain();}
 
 async function submitChain() {
@@ -1612,13 +1624,14 @@ async function pickActor(idx,a) {
   }catch(e){setFb(fb,'bad','Something went wrong.');}
 }
 
-async function srchTitleInline(connIdx,q){clearTimeout(G.srchTmr[`t${connIdx}`]);const el=document.getElementById(`titleSug${connIdx}`);if(!q||q.length<2){el.innerHTML='';return;}el.innerHTML=`<div class="sug-item"><div class="loading-dots"><span></span><span></span><span></span></div></div>`;G.srchTmr[`t${connIdx}`]=setTimeout(async()=>{try{const res=await searchTitles(q);const valid=res.filter(t=>G.pendingTitles.some(pt=>pt.id===t.id));if(!valid.length){el.innerHTML=res.length?res.map(t=>`<div class="sug-item" style="opacity:.4"><div class="sug-ph" style="display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--surf2)">🎬</div><div><div class="sug-nm">${esc(t.title)}</div><div class="sug-kn">${t.release_date?.slice(0,4)||''} — not a match</div></div></div>`).join(''):`<div class="sug-item" style="color:var(--muted)">No results</div>`;}else{el.innerHTML=valid.map(t=>{const yr=t.release_date?.slice(0,4)||'';return`<div class="sug-item" onclick='pickTitle(${connIdx},${JSON.stringify(t).replace(/'/g,"&#39;")})'><div class="sug-ph" style="display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--surf2)">🎬</div><div><div class="sug-nm">${esc(t.title)}</div><div class="sug-kn">${yr}</div></div></div>`;}).join('');}}catch(e){el.innerHTML=`<div class="sug-item" style="color:var(--red)">Search error</div>`;}},380);}
+async function srchTitleInline(connIdx,q){clearTimeout(G.srchTmr[`t${connIdx}`]);const el=document.getElementById(`titleSug${connIdx}`);if(!q||q.length<2){el.innerHTML='';return;}el.innerHTML=`<div class="sug-item"><div class="loading-dots"><span></span><span></span><span></span></div></div>`;G.srchTmr[`t${connIdx}`]=setTimeout(async()=>{try{const res=await searchTitles(q);const valid=res.filter(t=>G.pendingTitles.some(pt=>pt.id===t.id));if(!valid.length){el.innerHTML=res.length?res.map(t=>`<div class="sug-item" style="opacity:.4"><div class="sug-ph" style="display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--surf2)">🎬</div><div><div class="sug-nm">${esc(t.title)}</div><div class="sug-kn">${t.release_date?.slice(0,4)||''} — not a match</div></div></div>`).join(''):`<div class="sug-item" style="color:var(--muted)">No results</div>`;}else{const itemsWithDirectors=await Promise.all(valid.map(async t=>{const yr=t.release_date?.slice(0,4)||'';const dir=await getDirector(t.id);const sub=[yr,dir?`Dir. ${dir}`:null].filter(Boolean).join(' · ');return`<div class="sug-item" onclick='pickTitle(${connIdx},${JSON.stringify(t).replace(/'/g,"&#39;")})'><div class="sug-ph" style="display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--surf2)">🎬</div><div><div class="sug-nm">${esc(t.title)}</div><div class="sug-kn">${sub}</div></div></div>`;}));el.innerHTML=itemsWithDirectors.join('');}}catch(e){el.innerHTML=`<div class="sug-item" style="color:var(--red)">Search error</div>`;}},380);}
 
 async function pickTitle(connIdx,t) {
   if(typeof t==='string')t=JSON.parse(t);
   const fb=document.getElementById(`titleFb${connIdx}`);
   const match=G.pendingTitles.find(pt=>pt.id===t.id);
   if(!match){G.wrongCount++;const topActor=G.chain[connIdx]?.actor;const botActor=connIdx===G.chainLen-2?G.endActor:G.pendingActor;setFb(fb,'bad',`✗ <strong>${esc(t.title)}</strong> doesn't connect <strong>${esc(topActor?.name||'')}</strong> and <strong>${esc(botActor?.name||'')}</strong> — try another movie!`);const inp=document.getElementById(`titleInp${connIdx}`);if(inp){inp.value='';inp.focus();}return;}
+  getDirector(t.id).then(dir=>{if(dir)t.director=dir;});
   if(connIdx===G.chainLen-2)await commitEndTitle(match);else await commitStep(match);
 }
 
@@ -1673,7 +1686,7 @@ async function showWin() {
     const slot=G.chain[i],actor=slot.actor;
     const dc=i===0?'var(--green)':i===N-1?'var(--red)':'var(--gold)';
     ch+=`<div class="wc-step"><div class="wc-dot" style="background:${dc}"></div><strong>${esc(actor.name)}</strong></div>`;
-    if(slot.title)ch+=`<div class="wc-ttl">🎬 ${esc(slot.title.title||slot.title.name||'')}</div>`;
+    if(slot.title)ch+=`<div class="wc-ttl">🎬 ${esc(slot.title.title||slot.title.name||'')}${slot.title.director?`<span style="color:var(--muted);font-size:11px;font-weight:400;margin-left:6px">Dir. ${esc(slot.title.director)}</span>`:''}</div>`;
   }
   const chainTitle = G.isDailyGame
     ? `<div class="wc-title">Your Chain · <span style="color:var(--hard-c);font-weight:700">🔴 HARD MODE</span></div>`
