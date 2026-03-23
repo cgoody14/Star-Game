@@ -766,7 +766,7 @@ const G = {
   pendingActor: null, pendingTitles: [],
   mhActors: {}, mhTitles: {}, mhErrors: [],
   isCircleMode: false, circleActor: null, circActs: {}, circMovs: {}, circErrors: [],
-  srchTmr: {}, gameTs: 0, wrongCount: 0, directorCache: {},
+  srchTmr: {}, gameTs: 0, wrongCount: 0, directorCache: {}, creditsCache: {},
   timerIv: null, timerSec: 90, clockIv: null,
   isDailyGame: false, dailyDate: null,
   dailyPuzzle: null,
@@ -865,8 +865,11 @@ async function findActors(q) {
   return (d.results||[]).slice(0,7);
 }
 async function getCredits(id) {
+  if (G.creditsCache[id]) return G.creditsCache[id];
   const d = await tmdb(`/person/${id}/combined_credits`);
-  return (d.cast||[]).filter(c => c.media_type==='movie');
+  const credits = (d.cast||[]).filter(c => c.media_type==='movie');
+  G.creditsCache[id] = credits;
+  return credits;
 }
 async function sharedTitles(id1, id2) {
   for (let attempt = 0; attempt < 3; attempt++) {
