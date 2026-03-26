@@ -1202,7 +1202,7 @@ async function playPuzzle(dateStr) {
   G.dailyDate = dateStr;
   G.startActor = { id: puzzle.start_actor_id, name: puzzle.start_actor_name, profile_path: puzzle.start_actor_img };
   G.endActor = { id: puzzle.end_actor_id, name: puzzle.end_actor_name, profile_path: puzzle.end_actor_img };
-  G.chainLen = puzzle.chain_length;
+  G.chainLen = 6;
   updSlider(G.chainLen);
   if (loadWip(dateStr, G.diff)) {
     killTimer();
