@@ -768,7 +768,7 @@ const G = {
   isCircleMode: false, circleActor: null, circActs: {}, circMovs: {}, circErrors: [],
   srchTmr: {}, gameTs: 0, wrongCount: 0, directorCache: {}, creditsCache: {},
   timerIv: null, timerSec: 90, clockIv: null,
-  isDailyGame: false, dailyDate: null,
+  isDailyGame: false, dailyDate: null, editingBoundary: null,
   dailyPuzzle: null,
 };
 
@@ -1349,6 +1349,7 @@ function renderHdrChain() {
 
 function startGame() {
   G.isCircleMode = false;
+  G.editingBoundary = null;
   killTimer();
   G.chain = new Array(G.chainLen).fill(null).map(()=>({actor:null,title:null}));
   G.usedActors = new Set([G.startActor.id, G.endActor.id]);
@@ -1474,8 +1475,19 @@ function renderChain() {
     const bt = isStart?'START':isEnd?'END':`STEP ${i}`;
     const canEditActor = !mh && !isStart && !isEnd && isConfirmed && i < G.step;
 
-    if (actor || isStart || isEnd) {
+    if ((isStart || isEnd) && G.editingBoundary === i) {
+      h += `<div class="${sc} is-active" id="slot${i}">` +
+        `<span class="af-badge ${bc}" style="flex-shrink:0">${bt}</span>` +
+        `<div class="actor-search">` +
+        `<div class="slot-label">👤 Choose ${isStart?'Start':'End'} Actor</div>` +
+        `<div class="inline-srch-wrap"><input class="inline-inp" id="actorInp${i}" placeholder="Search actor…" oninput="srchBoundary(${i},this.value)" autocomplete="off"><div class="inline-sug" id="actorSug${i}"></div></div>` +
+        `</div>` +
+        `<div class="slot-action-row"><button class="slot-edit-btn" onclick="cancelBoundary()">✕ Cancel</button></div>` +
+        `</div>`;
+    } else if (actor || isStart || isEnd) {
       const ph = actor?.profile_path ? IMG(actor.profile_path,'w92') : null;
+      const canEditBoundary = !G.isDailyGame && (isStart || isEnd);
+      const isPendingActorSlot = !mh && isPendingActor;
       h += `<div class="${sc}${actorErr?' is-wrong':''}" id="slot${i}">` +
         `<div class="actor-filled">` +
         `<span class="af-badge ${bc}" style="flex-shrink:0">${bt}</span>` +
@@ -1485,6 +1497,8 @@ function renderChain() {
         `</div></div>` +
         (mh&&!isStart&&!isEnd?`<div class="slot-action-row"><button class="slot-edit-btn" onclick="clearMhActor(${i})">✕ Change</button></div>`:'') +
         (canEditActor?`<div class="slot-action-row"><button class="slot-edit-btn" onclick="editStep(${i})">✏️ Edit Actor</button></div>`:'') +
+        (canEditBoundary?`<div class="slot-action-row"><button class="slot-edit-btn" onclick="editBoundary(${i})">✕ Change</button></div>`:'') +
+        (isPendingActorSlot?`<div class="slot-action-row"><button class="slot-edit-btn" onclick="undoPendingActor()">↩ Change Actor</button></div>`:'') +
         `</div>`;
     } else if (mh && !isStart && !isEnd) {
       h += `<div class="${sc} is-active" id="slot${i}">` +
@@ -1598,6 +1612,54 @@ function srchTitleMH(connIdx,q){clearTimeout(G.srchTmr[`t${connIdx}`]);const el=
 function pickTitleMH(connIdx,t){if(typeof t==='string')t=JSON.parse(t);G.mhErrors=G.mhErrors.filter(e=>!(e.type==='title'&&e.idx===connIdx));G.mhTitles[connIdx]=t;getDirector(t.id).then(dir=>{if(dir)t.director=dir;});renderChain();}
 function clearMhTitle(connIdx){delete G.mhTitles[connIdx];G.mhErrors=G.mhErrors.filter(e=>!(e.type==='title'&&e.idx===connIdx));renderChain();}
 
+// ── BOUNDARY ACTOR EDITING ──────────────────────────────────────────────────
+function editBoundary(i) {
+  G.editingBoundary = i;
+  const mh = G.diff==='med'||G.diff==='hard';
+  if (mh) {
+    if (i===0) delete G.mhTitles[0];
+    else delete G.mhTitles[G.chainLen-2];
+    G.mhErrors = [];
+  }
+  renderChain();
+  setTimeout(()=>{const el=document.getElementById(`actorInp${i}`);if(el)el.focus();},120);
+}
+function cancelBoundary() { G.editingBoundary=null; renderChain(); }
+function srchBoundary(i,q) {
+  clearTimeout(G.srchTmr[`b${i}`]);
+  const el=document.getElementById(`actorSug${i}`);
+  if(!q||q.length<2){if(el)el.innerHTML='';return;}
+  if(el)el.innerHTML=`<div class="sug-item"><div class="loading-dots"><span></span><span></span><span></span></div></div>`;
+  const mh=G.diff==='med'||G.diff==='hard';
+  const excl=new Set([i===0?G.endActor?.id:G.startActor?.id].filter(Boolean));
+  if(mh){Object.values(G.mhActors).forEach(a=>excl.add(a.id));}
+  else{G.chain.forEach((s,idx)=>{if(idx!==i&&s?.actor)excl.add(s.actor.id);});}
+  G.srchTmr[`b${i}`]=setTimeout(async()=>{
+    try{
+      const res=await findActors(q);
+      const fil=res.filter(a=>!excl.has(a.id));
+      const sugEl=document.getElementById(`actorSug${i}`);
+      if(sugEl)sugEl.innerHTML=fil.length?fil.map(a=>`<div class="sug-item" onclick='pickBoundary(${i},${JSON.stringify(a).replace(/'/g,"&#39;")})'>${a.profile_path?`<img class="sug-ph" src="${IMG(a.profile_path)}" onerror="actorFallback(this,'sug-ph')"/>`:`<div class="sug-ph" style="display:flex;align-items:center;justify-content:center;font-size:17px">👤</div>`}<div><div class="sug-nm">${esc(a.name)}</div><div class="sug-kn">${a.known_for_department||'Acting'}</div></div></div>`).join(''):`<div class="sug-item" style="color:var(--muted)">No results</div>`;
+    }catch(e){const sugEl=document.getElementById(`actorSug${i}`);if(sugEl)sugEl.innerHTML=`<div class="sug-item" style="color:var(--red)">Search error</div>`;}
+  },380);
+}
+function pickBoundary(i,a) {
+  if(typeof a==='string')a=JSON.parse(a);
+  G.editingBoundary=null;
+  if(i===0)G.startActor=a;else G.endActor=a;
+  const mh=G.diff==='med'||G.diff==='hard';
+  if(mh){G.usedActors=new Set([G.startActor.id,G.endActor.id,...Object.values(G.mhActors).map(x=>x.id)]);renderChain();}
+  else{startGame();}
+}
+function undoPendingActor() {
+  const actor=G.pendingActor;
+  if(actor)G.usedActors.delete(actor.id);
+  G.chain[G.step].actor=null;
+  G.pendingActor=null;G.pendingTitles=[];
+  G.phase='actor';
+  renderChain();
+}
+
 async function submitChain() {
   const N=G.chainLen, isHard=G.diff==='hard';
   G.mhErrors=[];
@@ -1657,10 +1719,27 @@ async function srchTitleInline(connIdx,q){clearTimeout(G.srchTmr[`t${connIdx}`])
 async function pickTitle(connIdx,t) {
   if(typeof t==='string')t=JSON.parse(t);
   const fb=document.getElementById(`titleFb${connIdx}`);
-  const match=G.pendingTitles.find(pt=>pt.id===t.id);
-  if(!match){G.wrongCount++;const topActor=G.chain[connIdx]?.actor;const botActor=connIdx===G.chainLen-2?G.endActor:G.pendingActor;setFb(fb,'bad',`✗ <strong>${esc(t.title)}</strong> doesn't connect <strong>${esc(topActor?.name||'')}</strong> and <strong>${esc(botActor?.name||'')}</strong> — try another movie!`);const inp=document.getElementById(`titleInp${connIdx}`);if(inp){inp.value='';inp.focus();}return;}
-  getDirector(t.id).then(dir=>{if(dir)t.director=dir;});
-  if(connIdx===G.chainLen-2)await commitEndTitle(match);else await commitStep(match);
+  const inp=document.getElementById(`titleInp${connIdx}`);
+  const topActor=G.chain[connIdx]?.actor;
+  const botActor=connIdx===G.chainLen-2?G.endActor:G.pendingActor;
+  setFb(fb,'info','Checking…');
+  try {
+    const shared=await sharedTitles(topActor.id,botActor.id);
+    const match=shared.find(s=>s.id===t.id);
+    if(!match){
+      G.wrongCount++;
+      setFb(fb,'bad',`❌ <strong>${esc(t.title)}</strong> doesn't connect <strong>${esc(topActor?.name||'')}</strong> and <strong>${esc(botActor?.name||'')}</strong>`);
+      if(inp){inp.value='';inp.focus();}
+      return;
+    }
+    setFb(fb,'ok',`✅ <strong>${esc(t.title)}</strong> — correct!`);
+    getDirector(t.id).then(dir=>{if(dir)t.director=dir;});
+    await new Promise(r=>setTimeout(r,600));
+    if(connIdx===G.chainLen-2)await commitEndTitle(match);else await commitStep(match);
+  } catch(e) {
+    setFb(fb,'bad','Error — try again.');
+    if(inp){inp.value='';inp.focus();}
+  }
 }
 
 async function commitStep(match) {
