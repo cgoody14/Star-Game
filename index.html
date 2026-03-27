@@ -1113,6 +1113,18 @@ async function goDailySetup() {
   if (p.start_actor_img) { startPh.outerHTML = `<img class="dap-ph" id="dapStartPh" src="${IMG(p.start_actor_img,'w185')}" onerror="this.style.display='none'">`; }
   if (p.end_actor_img) { endPh.outerHTML = `<img class="dap-ph" id="dapEndPh" src="${IMG(p.end_actor_img,'w185')}" onerror="this.style.display='none'">`; }
   goScreen('dailysetup');
+  // Fetch fresh actor pictures from TMDB in background to fill any missing images
+  try {
+    const [sr, er] = await Promise.all([findActors(p.start_actor_name), findActors(p.end_actor_name)]);
+    if (sr && sr.length && sr[0].profile_path) {
+      const el = document.getElementById('dapStartPh');
+      if (el) el.outerHTML = `<img class="dap-ph" id="dapStartPh" src="${IMG(sr[0].profile_path,'w185')}" onerror="this.style.display='none'">`;
+    }
+    if (er && er.length && er[0].profile_path) {
+      const el = document.getElementById('dapEndPh');
+      if (el) el.outerHTML = `<img class="dap-ph" id="dapEndPh" src="${IMG(er[0].profile_path,'w185')}" onerror="this.style.display='none'">`;
+    }
+  } catch(e) {}
 }
 
 async function launchDailyGame() {
@@ -1202,6 +1214,12 @@ async function playPuzzle(dateStr) {
   G.dailyDate = dateStr;
   G.startActor = { id: puzzle.start_actor_id, name: puzzle.start_actor_name, profile_path: puzzle.start_actor_img };
   G.endActor = { id: puzzle.end_actor_id, name: puzzle.end_actor_name, profile_path: puzzle.end_actor_img };
+  // Resolve correct TMDB IDs and pictures by name — fixes wrong IDs and missing images from DB
+  try {
+    const [sr, er] = await Promise.all([findActors(puzzle.start_actor_name), findActors(puzzle.end_actor_name)]);
+    if (sr && sr.length) G.startActor = { id: sr[0].id, name: sr[0].name, profile_path: sr[0].profile_path };
+    if (er && er.length) G.endActor = { id: er[0].id, name: er[0].name, profile_path: er[0].profile_path };
+  } catch(e) {}
   G.chainLen = 6;
   updSlider(G.chainLen);
   if (loadWip(dateStr, G.diff)) {
